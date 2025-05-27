@@ -29,9 +29,6 @@
             setLogLevel 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // MODO DE PRUEBA: Cambia a 'true' para saltar la autenticación durante las pruebas.
-        const TESTING_MODE = false; 
-
         // Your web app's Firebase configuration (valores proporcionados por el usuario)
         const firebaseConfig = {
           apiKey: "AIzaSyB0uI9mJ6TnY8JaSiO_B0YHS4-MxTdZ8_A",
@@ -93,7 +90,7 @@
             if (user) { 
                 userId = user.uid;
                 userEmail = user.email;
-                console.log("Usuario autenticado:", userId, userEmail);
+                console.log("onAuthStateChanged - Usuario autenticado:", userId, userEmail);
                 
                 if (messageArea) messageArea.textContent = ''; 
                 if (messageAreaApp) messageAreaApp.textContent = ''; 
@@ -101,7 +98,7 @@
                 showAppUI();
                 loadFinancialData();
             } else { 
-                console.log("No hay usuario autenticado. Auth state known:", authStateKnown);
+                console.log("onAuthStateChanged - No hay usuario autenticado. Auth state known:", authStateKnown);
                 if (authStateKnown) { 
                     userId = null;
                     userEmail = null;
@@ -373,6 +370,7 @@
         }
 
         async function saveFinancialData() { 
+            console.log("Guardando datos para userId:", userId); // Log para depuración
             if (!userId || !db) { showMessage(!userId ? "Debes estar autenticado para guardar." : "Base de datos no lista.", "error", messageAreaApp); return; } 
             if (!mainIncomeInput || !mainIncomeDateInput) { showMessage("Elementos de la interfaz no están listos para guardar.", "error", messageAreaApp); return; } 
             updateGeneralExpensesFromDOM(); 
@@ -389,14 +387,21 @@
         }
 
         function loadFinancialData() { 
+            console.log("Intentando cargar datos para userId:", userId); // Log para depuración
             if (!userId || !db) {console.warn("loadFinancialData: No userId or db."); return;} 
-            if (financialDataUnsubscribe) financialDataUnsubscribe(); 
+            if (financialDataUnsubscribe) {
+                console.log("Desuscribiendo de escucha anterior de Firestore.");
+                financialDataUnsubscribe(); 
+                financialDataUnsubscribe = null;
+            }
             const docRef = doc(db, "artifacts", appIdPath, "users", userId, "financialData", "main"); 
+            console.log("Escuchando cambios en Firestore para el documento:", docRef.path);
             financialDataUnsubscribe = onSnapshot(docRef, (docSnap) => { 
-                if (!mainIncomeInput || !mainIncomeDateInput || !expensesList) { console.warn("loadFinancialData: DOM not fully ready for update from Firestore."); return; } 
+                console.log("onSnapshot callback - userId actual:", userId);
+                if (!mainIncomeInput || !mainIncomeDateInput || !expensesList) { console.warn("loadFinancialData (onSnapshot): DOM not fully ready for update from Firestore."); return; } 
                 if (docSnap.exists()) { 
                     const data = docSnap.data(); 
-                    console.log("Datos cargados:", data); 
+                    console.log("Datos cargados desde Firestore:", data); 
                     mainIncome = data.mainIncome || { amount: 0, date: new Date().toISOString().split('T')[0] };
                     mainIncomeInput.value = formatCurrencyCLP(mainIncome.amount, false); 
                     mainIncomeDateInput.value = mainIncome.date;
@@ -414,6 +419,7 @@
                     calculateAndRenderAll(); 
                     showMessage("Datos cargados.", "success", messageAreaApp); 
                 } else { 
+                    console.log("No se encontraron datos en Firestore para este usuario. Inicializando con valores por defecto.");
                     showMessage("No hay datos guardados para este usuario. ¡Empieza a añadir!", "info", messageAreaApp); 
                     mainIncome = { amount: 0, date: new Date().toISOString().split('T')[0] };
                     mainIncomeInput.value = ''; 
@@ -429,7 +435,7 @@
                     updateCardForExpenseSelect(); 
                     calculateAndRenderAll(); 
                 } 
-            }, (error) => { console.error("Error al cargar:", error); showMessage(`Error al cargar: ${error.message}`, "error", messageAreaApp); });
+            }, (error) => { console.error("Error al cargar datos de Firestore:", error); showMessage(`Error al cargar: ${error.message}`, "error", messageAreaApp); });
         }
         function showMessage(message, type = "info", area = messageAreaApp) { if (!area) { console.warn("showMessage: messageArea no disponible para:", message); return;} area.textContent = message; area.className = 'p-3 rounded-md text-sm mb-4 transition-opacity duration-300 opacity-100'; const colors = { success: 'bg-green-100 text-green-700', error: 'bg-red-100 text-red-700', warn: 'bg-yellow-100 text-yellow-700', info: 'bg-blue-100 text-blue-700' }; area.classList.add(...(colors[type] || colors.info).split(' ')); setTimeout(() => { if(area) { area.classList.remove('opacity-100'); area.classList.add('opacity-0'); setTimeout(() => { if(area && area.textContent === message) { area.textContent = ''; area.className = 'p-3 rounded-md text-sm mb-4'; }}, 300); } }, 5000);}
         function openModal(modalElement) { if(modalElement) modalElement.classList.remove('hidden'); }
