@@ -704,7 +704,7 @@
 
         <div id="messageAreaApp" class="p-3 rounded-md text-sm mb-4" role="alert"></div> 
         
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
             <div class="lg:col-span-1 space-y-6">
                 <section class="p-4 bg-green-50 rounded-lg shadow">
                     <h2 class="text-xl font-semibold text-green-600 mb-3">Ingreso/Aporte Principal</h2>
@@ -743,7 +743,7 @@
             </div>
 
             <div class="lg:col-span-2 space-y-6">
-                <section class="p-4 bg-indigo-50 rounded-lg shadow">
+                 <section class="p-4 bg-indigo-50 rounded-lg shadow">
                     <h2 class="text-xl font-semibold text-indigo-600 mb-3">Resumen de Ingresos y Saldos</h2>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 text-sm">
@@ -764,46 +764,50 @@
                         <p class="text-lg">Balance (Ingreso - Gastos): <strong id="balance" class="text-gray-800">$0</strong></p>
                     </div>
                 </section>
-
-                <section class="p-6 bg-blue-50 rounded-lg shadow">
-                    <h2 class="text-2xl font-semibold text-blue-700 mb-4 text-center">Proyección Pagos Tarjetas de Crédito</h2>
-                    <div class="mb-6">
-                        <h3 class="text-lg font-medium text-blue-600 mb-2">Añadir Tarjeta de Crédito</h3>
-                        <div class="flex flex-col sm:flex-row items-start gap-2">
-                            <input type="text" id="newCardNameInput" placeholder="Nombre Tarjeta (Ej: Visa Banco X)" class="flex-grow p-2 border rounded-md mb-2 sm:mb-0">
-                            <div class="flex items-center gap-2">
-                                <label for="newCardColorInput" class="text-sm">Color:</label>
-                                <input type="color" id="newCardColorInput" value="#4299E1" class="p-1 h-8 w-14 block bg-white border border-gray-300 rounded-md shadow-sm cursor-pointer">
-                            </div>
-                            <button id="addCardButton" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-3 rounded-md text-sm w-full sm:w-auto">Añadir Tarjeta</button>
-                        </div>
-                         <button id="openAddCreditExpenseModalButton" class="w-full mt-3 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md text-sm">
-                            + Registrar Gasto en Tarjeta
-                        </button>
-                    </div>
-                    <div id="creditCardsListContainer" class="mb-6 space-y-3 scrollable-list pr-1">
-                        </div>
-                    <div class="mb-6">
-                        <h3 class="text-lg font-medium text-blue-600 mb-2">Pagos Mensuales Totales (Todas las Tarjetas)</h3>
-                        <div id="creditCardPaymentsChartContainer" class="bg-white p-2 rounded-md shadow">
-                            <canvas id="creditCardPaymentsChart"></canvas>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-medium text-blue-600 mb-2">Detalle Pagos Próximos Meses</h3>
-                        <div class="overflow-x-auto bg-white p-2 rounded-md shadow">
-                            <table class="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
-                                <thead id="creditCardPaymentsTableHeader">
-                                    </thead>
-                                <tbody id="creditCardPaymentsTableBody" class="divide-y divide-gray-200">
-                                    </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
             </div>
         </div>
         
+        <section class="mt-12 p-6 bg-blue-50 rounded-lg shadow"> {/* Aumentado margen superior */}
+            <h2 class="text-2xl font-semibold text-blue-700 mb-6 text-center">Gestión de Tarjetas de Crédito</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="md:col-span-1 space-y-4">
+                    <h3 class="text-lg font-medium text-blue-600 mb-2">Añadir Tarjeta de Crédito</h3>
+                    <div class="flex flex-col sm:flex-row items-start gap-2">
+                        <input type="text" id="newCardNameInput" placeholder="Nombre Tarjeta (Ej: Visa Banco X)" class="flex-grow p-2 border rounded-md mb-2 sm:mb-0">
+                        <div class="flex items-center gap-2">
+                            <label for="newCardColorInput" class="text-sm">Color:</label>
+                            <input type="color" id="newCardColorInput" value="#4299E1" class="p-1 h-8 w-14 block bg-white border border-gray-300 rounded-md shadow-sm cursor-pointer">
+                        </div>
+                        <button id="addCardButton" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-3 rounded-md text-sm w-full sm:w-auto">Añadir Tarjeta</button>
+                    </div>
+                     <button id="openAddCreditExpenseModalButton" class="w-full mt-3 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md text-sm">
+                        + Registrar Gasto en Tarjeta
+                    </button>
+                </div>
+                <div id="creditCardsListContainer" class="md:col-span-2 space-y-4 scrollable-list pr-1">
+                    </div>
+            </div>
+            <div class="mt-8"> 
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium text-blue-600 mb-2">Pagos Mensuales Totales (Todas las Tarjetas)</h3>
+                    <div id="creditCardPaymentsChartContainer" class="bg-white p-2 rounded-md shadow">
+                        <canvas id="creditCardPaymentsChart"></canvas>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium text-blue-600 mb-2">Detalle Pagos Próximos Meses</h3>
+                    <div class="overflow-x-auto bg-white p-2 rounded-md shadow">
+                        <table class="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
+                            <thead id="creditCardPaymentsTableHeader">
+                                </thead>
+                            <tbody id="creditCardPaymentsTableBody" class="divide-y divide-gray-200">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <div id="addCreditExpenseModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center hidden z-50">
             <div class="relative mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white modal-content">
                 <div class="flex justify-between items-center mb-4"> <h3 class="text-xl font-semibold text-gray-900">Añadir Gasto en Tarjeta de Crédito</h3> <button id="closeCreditExpenseModalButton" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center"> <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg> </button> </div>
@@ -852,3 +856,831 @@
     </div>
 </body>
 </html>
+I have selected "        // MODO DE PRUEBA: Cambia a 'false' para el funcionamiento normal con autenticación real.
+        const TESTING_MODE = true; 
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyB0uI9mJ6TnY8JaSiO_B0YHS4-MxTdZ8_A",
+          authDomain: "control-de-gastos-8b15c.firebaseapp.com",
+          projectId: "control-de-gastos-8b15c",
+          storageBucket: "control-de-gastos-8b15c.firebasestorage.app",
+          messagingSenderId: "974277292490",
+          appId: "1:974277292490:web:3dc92c5ae0611b3969df33",
+          measurementId: "G-YKGDRHGGQQ" // Opcional, pero se mantiene ya que lo proporcionaste
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        setLogLevel('debug');
+        const appIdPath = typeof __app_id !== 'undefined' ? __app_id : 'default-gastos-pro-app'; 
+
+        let userId = null;
+        let userEmail = null;
+        let financialDataUnsubscribe = null;
+        
+        let categories = [{ id: crypto.randomUUID(), name: "General" }];
+        let generalExpenses = [];
+        let creditCards = []; 
+        let mainIncome = { amount: 0, date: new Date().toISOString().split('T')[0] }; 
+
+        // DOM Elements
+        let authContainer, appContainer, userDisplayArea;
+        let loginForm, registerForm, emailInputLogin, passwordInputLogin, emailInputRegister, passwordInputRegister, passwordConfirmInputRegister;
+        let showRegisterFormButton, showLoginFormButton, logoutButton;
+
+        let mainIncomeInput, mainIncomeDateInput, expensesList, addExpenseButton, totalGeneralExpensesDisplay, balanceDisplay, saveButton, userIdDisplay, messageArea, messageAreaApp;
+        let newCategoryInput, addCategoryButton, categoriesListDisplay, exportButton;
+        
+        let creditCardPaymentsChartCanvas, creditCardPaymentsTableBody;
+        let creditCardChartInstance = null;
+
+        let newCardNameInput, newCardColorInput, addCardButton, creditCardsListContainer, addCreditExpenseModal, closeCreditExpenseModalButton, creditExpenseForm, cardForExpenseSelect, creditExpenseDescription, creditExpenseAmount, creditExpenseInstallments, creditExpensePurchaseDate, creditExpenseNotes, openAddCreditExpenseModalButton;
+        let saveMainIncomeButton;
+        let incomeSummaryTableBody;
+
+        // Gemini API related DOM Elements
+        let analyzeExpensesButton;
+        let analysisResultModal, analysisResultText, closeAnalysisResultModalButton, analysisLoadingIndicator;
+
+
+        // --- UI Toggling ---
+        function showAuthUI() { if (authContainer) authContainer.classList.remove('hidden'); if (appContainer) appContainer.classList.add('hidden'); if (userDisplayArea) userDisplayArea.classList.add('hidden'); if (loginForm) loginForm.classList.remove('hidden'); if (registerForm) registerForm.classList.add('hidden');}
+        function showAppUI() { if (authContainer) authContainer.classList.add('hidden'); if (appContainer) appContainer.classList.remove('hidden'); if (userDisplayArea) userDisplayArea.classList.remove('hidden'); if (userIdDisplay && userEmail) userIdDisplay.textContent = `Usuario: ${userEmail}`; else if (userIdDisplay && userId) userIdDisplay.textContent = `ID de Usuario: ${userId}`; else if (userIdDisplay) userIdDisplay.textContent = 'Cargando usuario...';}
+        
+        // --- Authentication Logic ---
+        async function handleRegistration(event) { event.preventDefault(); const email = emailInputRegister.value; const password = passwordInputRegister.value; const passwordConfirm = passwordConfirmInputRegister.value; if (password !== passwordConfirm) { showMessage("Las contraseñas no coinciden.", "error", messageArea); return; } if (password.length < 6) { showMessage("La contraseña debe tener al menos 6 caracteres.", "error", messageArea); return; } try { await createUserWithEmailAndPassword(auth, email, password); showMessage("¡Registro exitoso! Iniciando sesión...", "success", messageArea); } catch (error) { console.error("Error de registro:", error); showMessage(`Error de registro: ${mapAuthError(error.code)}`, "error", messageArea); }}
+        async function handleLogin(event) { event.preventDefault(); const email = emailInputLogin.value; const password = passwordInputLogin.value; try { await setPersistence(auth, browserLocalPersistence); await signInWithEmailAndPassword(auth, email, password); showMessage("¡Inicio de sesión exitoso!", "success", messageArea); } catch (error) { console.error("Error de inicio de sesión:", error); showMessage(`Error de inicio de sesión: ${mapAuthError(error.code)}`, "error", messageArea); }}
+        async function handleLogout() { try { await signOut(auth); } catch (error) { console.error("Error al cerrar sesión:", error); showMessage(`Error al cerrar sesión: ${error.message}`, "error", messageAreaApp); }}
+        function mapAuthError(errorCode) { switch (errorCode) { case 'auth/email-already-in-use': return 'El correo electrónico ya está en uso.'; case 'auth/invalid-email': return 'El formato del correo electrónico no es válido.'; case 'auth/operation-not-allowed': return 'El inicio de sesión con correo y contraseña no está habilitado.'; case 'auth/weak-password': return 'La contraseña es demasiado débil.'; case 'auth/user-disabled': return 'Este usuario ha sido deshabilitado.'; case 'auth/user-not-found': return 'No se encontró un usuario con este correo.'; case 'auth/wrong-password': return 'Contraseña incorrecta.'; case 'auth/invalid-credential': return 'Credenciales inválidas.'; default: return errorCode; }}
+
+        onAuthStateChanged(auth, (user) => {
+            if (TESTING_MODE) {
+                userId = "test-user-id"; // ID de usuario fijo para pruebas
+                userEmail = "test@example.com"; // Correo de prueba
+                console.log("MODO DE PRUEBA ACTIVADO. Usuario de prueba:", userId, userEmail);
+                
+                if (messageArea) messageArea.textContent = ''; 
+                if (messageAreaApp) messageAreaApp.textContent = ''; 
+                
+                showAppUI(); 
+                loadFinancialData(); // Cargar datos para el usuario de prueba (o mostrar mensaje de no datos)
+                
+                if (logoutButton && userDisplayArea) { // Ajustar UI para modo prueba
+                    userDisplayArea.classList.remove('hidden');
+                    if(userIdDisplay) userIdDisplay.textContent = `MODO PRUEBA (${userEmail})`;
+                    // logoutButton.textContent = "Resetear Prueba"; // Opcional: cambiar texto del botón
+                }
+
+            } else if (user) { // Funcionamiento normal: Usuario autenticado
+                userId = user.uid;
+                userEmail = user.email;
+                console.log("Usuario autenticado:", userId, userEmail);
+                if (messageArea) messageArea.textContent = ''; 
+                if (messageAreaApp) messageAreaApp.textContent = ''; 
+                showAppUI();
+                loadFinancialData();
+            } else { // Funcionamiento normal: No hay usuario autenticado
+                userId = null;
+                userEmail = null;
+                console.log("No hay usuario autenticado.");
+                if (financialDataUnsubscribe) financialDataUnsubscribe(); 
+                generalExpenses = []; 
+                creditCards = [];
+                categories = [{ id: crypto.randomUUID(), name: "General" }];
+                mainIncome = { amount: 0, date: new Date().toISOString().split('T')[0] };
+                showAuthUI(); 
+                if (appContainer && document.readyState === "complete") { 
+                    if (mainIncomeInput) mainIncomeInput.value = '';
+                    if (mainIncomeDateInput) mainIncomeDateInput.value = new Date().toISOString().split('T')[0];
+                    if (expensesList) expensesList.innerHTML = '';
+                    if (categoriesListDisplay) renderCategories(); 
+                    if (creditCardsListContainer) renderCreditCards(); 
+                    if(totalGeneralExpensesDisplay) totalGeneralExpensesDisplay.textContent = formatCurrencyCLP(0);
+                    if(balanceDisplay) balanceDisplay.textContent = formatCurrencyCLP(0);
+                    renderCreditCardPaymentVisuals();
+                    renderIncomeSummary();
+                }
+            }
+        });
+
+        // --- Utility, App Logic ---
+        function formatCurrencyCLP(value, includeSymbol = true) { const num = Math.round(parseFloat(value)); if (isNaN(num)) return includeSymbol ? "$0" : "0"; const formattedNum = num.toLocaleString('es-CL'); return includeSymbol ? `$${formattedNum}` : formattedNum;}
+        function parseCurrencyCLP(value) { if (typeof value !== 'string') return parseFloat(value) || 0; return parseFloat(value.replace(/\$/g, '').replace(/\./g, '').replace(/,/g, '.')) || 0;}
+        function applyAmountFormattingListeners(inputElement) { if (!inputElement) return; inputElement.addEventListener('input', function(e) { let value = e.target.value; let rawValue = value.replace(/[^\d]/g, ''); if (rawValue) { const num = parseInt(rawValue, 10); e.target.value = num.toLocaleString('es-CL'); } else { e.target.value = ''; } }); inputElement.addEventListener('blur', function(e) { let rawValue = e.target.value.replace(/[^\d]/g, ''); if (rawValue) { e.target.value = formatCurrencyCLP(parseInt(rawValue, 10)); } else { e.target.value = ''; } const changeEvent = new Event('change', { bubbles: true, cancelable: true }); e.target.dispatchEvent(changeEvent); }); inputElement.addEventListener('focus', function(e) { let rawValue = e.target.value.replace(/[^\d]/g, ''); if (rawValue) { e.target.value = parseInt(rawValue, 10); } else { e.target.value = ''; } });}
+        function renderCategories() { if (!categoriesListDisplay) return; categoriesListDisplay.innerHTML = categories.length > 0 ? categories.map(cat => `<span class="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm">${cat.name}</span>`).join(' ') : `<span class="text-gray-400 text-sm italic">Aún no has añadido categorías.</span>`; updateAllExpenseCategoryDropdowns();}
+        function addCategory() { if (!newCategoryInput) return; const categoryName = newCategoryInput.value.trim(); if (categoryName && !categories.find(cat => cat.name.toLowerCase() === categoryName.toLowerCase())) { categories.push({ id: crypto.randomUUID(), name: categoryName }); newCategoryInput.value = ''; renderCategories(); showMessage(`Categoría "${categoryName}" añadida.`, "success", messageAreaApp); } else if (!categoryName) showMessage("Nombre de categoría vacío.", "warn", messageAreaApp); else showMessage(`Categoría "${categoryName}" ya existe.`, "warn", messageAreaApp);}
+        function updateExpenseCategoryDropdown(selectElement, selectedCategoryName = '') { if (!selectElement) return; const currentSelectedValue = selectElement.value; selectElement.innerHTML = '<option value="">Sin Categoría</option>'; categories.forEach(cat => { const option = document.createElement('option'); option.value = cat.name; option.textContent = cat.name; if (cat.name === selectedCategoryName || cat.name === currentSelectedValue) { option.selected = true; } selectElement.appendChild(option); });}
+        function updateAllExpenseCategoryDropdowns() { document.querySelectorAll('.expense-category-select').forEach(select => { if (select.closest('.expense-item')) { updateExpenseCategoryDropdown(select, select.dataset.selectedCategory || select.value); } });}
+        
+        function addGeneralExpenseItem(id = crypto.randomUUID(), name = '', amount = '', categoryName = '') {
+            if (!expensesList) return;
+            const listItem = document.createElement('div');
+            listItem.classList.add('flex', 'flex-col', 'sm:flex-row', 'gap-2', 'mb-3', 'p-3', 'border', 'border-gray-200', 'rounded-lg', 'expense-item');
+            listItem.dataset.id = id;
+
+            listItem.innerHTML = `
+                <div class="flex-grow sm:w-2/5 relative">
+                    <input type="text" placeholder="Nombre del Gasto" value="${name}" class="expense-name w-full p-2 border rounded-md pr-10" data-field="name">
+                    <button type="button" title="Sugerir Categoría con IA" class="suggest-category-btn absolute right-1 top-1/2 -translate-y-1/2 p-1 text-blue-500 hover:text-blue-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3L12 21M12 3L15.35 6.35M12 3L8.65 6.35M12 21L15.35 17.65M12 21L8.65 17.65M3 12L21 12M3 12L6.35 15.35M3 12L6.35 8.65M21 12L17.65 15.35M21 12L17.65 8.65M12 5.5C12.8284 5.5 13.5 4.82843 13.5 4C13.5 3.17157 12.8284 2.5 12 2.5C11.1716 2.5 10.5 3.17157 10.5 4C10.5 4.82843 11.1716 5.5 12 5.5ZM12 12.5C12.8284 12.5 13.5 11.8284 13.5 11C13.5 10.1716 12.8284 9.5 12 9.5C11.1716 9.5 10.5 10.1716 10.5 11C10.5 11.8284 11.1716 12.5 12 12.5ZM12 19.5C12.8284 19.5 13.5 18.8284 13.5 18C13.5 17.1716 12.8284 16.5 12 16.5C11.1716 16.5 10.5 17.1716 10.5 18C10.5 18.8284 11.1716 19.5 12 19.5Z"></path></svg>
+                    </button>
+                </div>
+                <select class="expense-category-select sm:w-1/4 p-2 border rounded-md" data-field="category" data-selected-category="${categoryName}"></select>
+                <input type="text" inputmode="text" placeholder="Monto (Ej: 10000)" value="${amount ? formatCurrencyCLP(amount, false) : ''}" class="expense-amount sm:w-1/4 p-2 border rounded-md" data-field="amount">
+                <button type="button" class="remove-expense text-red-500 hover:text-red-700 p-2 bg-red-100 rounded-md sm:w-auto w-full">&times; Eliminar</button>
+            `;
+            expensesList.appendChild(listItem);
+            applyAmountFormattingListeners(listItem.querySelector('.expense-amount'));
+            updateExpenseCategoryDropdown(listItem.querySelector('.expense-category-select'), categoryName);
+            
+            listItem.querySelector('.suggest-category-btn').addEventListener('click', async (e) => {
+                const expenseNameInput = listItem.querySelector('.expense-name');
+                const categorySelect = listItem.querySelector('.expense-category-select');
+                const expenseName = expenseNameInput.value.trim();
+                if (!expenseName) {
+                    showMessage("Por favor, ingresa un nombre para el gasto primero.", "warn", messageAreaApp);
+                    return;
+                }
+                e.target.disabled = true;
+                e.target.innerHTML = `<svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`; // Loading spinner
+
+                try {
+                    const suggestedCategory = await suggestCategoryWithGemini(expenseName, categories.map(c => c.name));
+                    if (suggestedCategory) {
+                        categorySelect.value = suggestedCategory;
+                        const changeEvent = new Event('change', { bubbles: true });
+                        categorySelect.dispatchEvent(changeEvent);
+                        showMessage(`Categoría sugerida: ${suggestedCategory}`, "info", messageAreaApp);
+                    } else {
+                        showMessage("No se pudo sugerir una categoría.", "warn", messageAreaApp);
+                    }
+                } catch (error) {
+                    console.error("Error al sugerir categoría:", error);
+                    showMessage("Error al contactar al asistente de IA.", "error", messageAreaApp);
+                } finally {
+                    e.target.disabled = false;
+                    e.target.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3L12 21M12 3L15.35 6.35M12 3L8.65 6.35M12 21L15.35 17.65M12 21L8.65 17.65M3 12L21 12M3 12L6.35 15.35M3 12L6.35 8.65M21 12L17.65 15.35M21 12L17.65 8.65M12 5.5C12.8284 5.5 13.5 4.82843 13.5 4C13.5 3.17157 12.8284 2.5 12 2.5C11.1716 2.5 10.5 3.17157 10.5 4C10.5 4.82843 11.1716 5.5 12 5.5ZM12 12.5C12.8284 12.5 13.5 11.8284 13.5 11C13.5 10.1716 12.8284 9.5 12 9.5C11.1716 9.5 10.5 10.1716 10.5 11C10.5 11.8284 11.1716 12.5 12 12.5ZM12 19.5C12.8284 19.5 13.5 18.8284 13.5 18C13.5 17.1716 12.8284 16.5 12 16.5C11.1716 16.5 10.5 17.1716 10.5 18C10.5 18.8284 11.1716 19.5 12 19.5Z"></path></svg>`;
+                }
+            });
+
+            listItem.querySelector('.remove-expense').addEventListener('click', () => { listItem.remove(); updateGeneralExpensesFromDOM(); calculateAndRenderAll(); });
+            listItem.querySelectorAll('input[type="text"].expense-name, select.expense-category-select, input.expense-amount').forEach(input => { input.addEventListener('change', () => { updateGeneralExpensesFromDOM(); calculateAndRenderAll(); }); });
+        }
+
+        function updateGeneralExpensesFromDOM() { generalExpenses = []; document.querySelectorAll('#expensesList .expense-item').forEach(item => { const id = item.dataset.id; const name = item.querySelector('.expense-name').value.trim(); const category = item.querySelector('.expense-category-select').value; const amount = parseCurrencyCLP(item.querySelector('.expense-amount').value); if (name && amount > 0) { generalExpenses.push({ id, name, amount, category }); } });}
+        function addCreditCard() { if (!newCardNameInput || !newCardColorInput) return; const cardName = newCardNameInput.value.trim(); const cardColor = newCardColorInput.value; if (cardName && !creditCards.find(cc => cc.name.toLowerCase() === cardName.toLowerCase())) { creditCards.push({ id: crypto.randomUUID(), name: cardName, color: cardColor, expenses: [] }); newCardNameInput.value = ''; renderCreditCards(); updateCardForExpenseSelect(); showMessage(`Tarjeta "${cardName}" añadida.`, "success", messageAreaApp); } else if (!cardName) showMessage("Nombre de tarjeta vacío.", "warn", messageAreaApp); else showMessage(`Tarjeta "${cardName}" ya existe.`, "warn", messageAreaApp);}
+        function renderCreditCards() { if (!creditCardsListContainer) return; creditCardsListContainer.innerHTML = ''; if (creditCards.length === 0) { creditCardsListContainer.innerHTML = `<p class="text-gray-500 italic">Aún no has añadido tarjetas de crédito.</p>`; return; } creditCards.forEach(card => { const cardDiv = document.createElement('div'); cardDiv.classList.add('p-4', 'bg-white', 'rounded-lg', 'shadow', 'mb-4'); cardDiv.innerHTML = ` <div class="flex justify-between items-center mb-3"> <h4 class="text-lg font-semibold" style="color:${card.color || '#0d6efd'};">${card.name} <span style="display:inline-block; width:12px; height:12px; background-color:${card.color || '#0d6efd'}; border-radius:50%; margin-left: 8px;"></span></h4> <button class="remove-card-btn text-xs text-red-500 hover:text-red-700" data-card-id="${card.id}">&times; Eliminar Tarjeta</button> </div> <div id="expenses-for-${card.id}" class="space-y-2 text-sm"></div> <p class="text-right font-semibold mt-3" style="color:${card.color || '#0d6efd'};">Pago este mes: <span id="monthly-payment-${card.id}">${formatCurrencyCLP(0)}</span></p> `; creditCardsListContainer.appendChild(cardDiv); renderCreditCardExpenses(card); cardDiv.querySelector('.remove-card-btn').addEventListener('click', (e) => { const cardIdToRemove = e.target.dataset.cardId; creditCards = creditCards.filter(c => c.id !== cardIdToRemove); renderCreditCards(); updateCardForExpenseSelect(); calculateAndRenderAll(); showMessage("Tarjeta eliminada.", "info", messageAreaApp); }); }); calculateAndRenderAll(); }
+        function renderCreditCardExpenses(card) { const container = document.getElementById(`expenses-for-${card.id}`); if (!container) return; container.innerHTML = ''; if (card.expenses.length === 0) { container.innerHTML = `<p class="text-gray-400 italic text-xs">Sin gastos registrados para esta tarjeta.</p>`; return; } const today = new Date(); const currentMonth = today.getMonth(); const currentYear = today.getFullYear(); card.expenses.forEach(exp => { const expenseDiv = document.createElement('div'); expenseDiv.classList.add('p-2', 'border', 'rounded-md', 'bg-gray-50'); let installmentsHtml = '<ul class="text-xs list-disc list-inside pl-2 mt-1">'; for (let i = 0; i < exp.installments; i++) { const paymentDate = new Date(exp.purchaseDate); paymentDate.setMonth(paymentDate.getMonth() + i); const isCurrentMonthInstallment = paymentDate.getMonth() === currentMonth && paymentDate.getFullYear() === currentYear; installmentsHtml += `<li class="${isCurrentMonthInstallment ? 'font-bold' : ''}" style="color:${isCurrentMonthInstallment ? (card.color || '#0d6efd') : 'inherit'};">Cuota ${i+1}/${exp.installments}: ${formatCurrencyCLP(exp.installmentAmount)} (Pagar en: ${paymentDate.toLocaleString('es-CL', {month: 'short', year: 'numeric'})})</li>`; } installmentsHtml += '</ul>'; expenseDiv.innerHTML = ` <div class="flex justify-between items-start"> <div> <p class="font-medium">${exp.description} - ${formatCurrencyCLP(exp.totalAmount)} (${exp.installments} cuota${exp.installments > 1 ? 's' : ''})</p> <p class="text-xs text-gray-500">Fecha compra: ${new Date(exp.purchaseDate).toLocaleDateString('es-CL')}</p> ${exp.notes ? `<p class="text-xs text-gray-500 italic">Nota: ${exp.notes}</p>` : ''} </div> <button class="remove-credit-expense-btn text-xs text-red-400 hover:text-red-600" data-card-id="${card.id}" data-expense-id="${exp.id}">&times;</button> </div> ${installmentsHtml} `; container.appendChild(expenseDiv); expenseDiv.querySelector('.remove-credit-expense-btn').addEventListener('click', (e) => { const cardId = e.target.dataset.cardId; const expenseIdToRemove = e.target.dataset.expenseId; const targetCard = creditCards.find(c => c.id === cardId); if (targetCard) { targetCard.expenses = targetCard.expenses.filter(ex => ex.id !== expenseIdToRemove); renderCreditCards(); showMessage("Gasto de tarjeta eliminado.", "info", messageAreaApp); } }); }); }
+        function handleAddCreditExpense(event) { event.preventDefault(); if (!cardForExpenseSelect || !creditExpenseDescription || !creditExpenseAmount || !creditExpenseInstallments || !creditExpensePurchaseDate || !creditExpenseNotes) return; const cardId = cardForExpenseSelect.value; const description = creditExpenseDescription.value.trim(); const totalAmount = parseCurrencyCLP(creditExpenseAmount.value); const installments = parseInt(creditExpenseInstallments.value) || 1; const purchaseDate = creditExpensePurchaseDate.value; const notes = creditExpenseNotes.value.trim(); if (!cardId || !description || totalAmount <= 0 || !purchaseDate) { showMessage("Por favor, completa todos los campos obligatorios del gasto de tarjeta.", "warn", messageAreaApp); return; } const targetCard = creditCards.find(cc => cc.id === cardId); if (targetCard) { targetCard.expenses.push({ id: crypto.randomUUID(), description, totalAmount, installments, purchaseDate, notes, installmentAmount: totalAmount / installments }); renderCreditCards(); showMessage("Gasto de tarjeta añadido.", "success", messageAreaApp); if (addCreditExpenseModal) closeModal(addCreditExpenseModal); if (creditExpenseForm) creditExpenseForm.reset(); if(creditExpensePurchaseDate) creditExpensePurchaseDate.valueAsDate = new Date(); } else { showMessage("Tarjeta no encontrada.", "error", messageAreaApp); } }
+        function updateCardForExpenseSelect() { if (!cardForExpenseSelect) return; cardForExpenseSelect.innerHTML = '<option value="">Selecciona una tarjeta</option>'; creditCards.forEach(card => { const option = document.createElement('option'); option.value = card.id; option.textContent = card.name; cardForExpenseSelect.appendChild(option); });}
+        function calculateMonthlyCardPayments() { const today = new Date(); const currentMonth = today.getMonth(); const currentYear = today.getFullYear(); creditCards.forEach(card => { let monthlyPayment = 0; card.expenses.forEach(exp => { for (let i = 0; i < exp.installments; i++) { const paymentDate = new Date(exp.purchaseDate); paymentDate.setMonth(paymentDate.getMonth() + i); if (paymentDate.getMonth() === currentMonth && paymentDate.getFullYear() === currentYear) { monthlyPayment += exp.installmentAmount; } } }); const paymentDisplay = document.getElementById(`monthly-payment-${card.id}`); if (paymentDisplay) paymentDisplay.textContent = formatCurrencyCLP(monthlyPayment); });}
+        
+        function calculateAndRenderAll() {
+            if (!mainIncomeInput || !totalGeneralExpensesDisplay || !balanceDisplay ) {
+                console.warn("calculateAndRenderAll: DOM elements not ready yet for full calculation.");
+                return;
+            }
+            mainIncome.amount = parseCurrencyCLP(mainIncomeInput.value);
+            mainIncome.date = mainIncomeDateInput.value;
+            
+            let totalGeneralExpensesValue = 0;
+            generalExpenses.forEach(exp => {
+                totalGeneralExpensesValue += exp.amount;
+            });
+
+            totalGeneralExpensesDisplay.textContent = formatCurrencyCLP(totalGeneralExpensesValue);
+            const currentBalance = mainIncome.amount - totalGeneralExpensesValue;
+            balanceDisplay.textContent = formatCurrencyCLP(currentBalance);
+            balanceDisplay.classList.toggle('text-red-600', currentBalance < 0);
+            balanceDisplay.classList.toggle('text-green-600', currentBalance >= 0);
+
+            renderCreditCardPaymentVisuals();
+            renderIncomeSummary();
+            calculateMonthlyCardPayments(); 
+        }
+
+        function renderCreditCardPaymentVisuals() {
+            if (!creditCardPaymentsTableBody || !creditCardPaymentsChartCanvas) return;
+            const tableHeader = document.getElementById('creditCardPaymentsTableHeader');
+            if (!tableHeader) return;
+
+            creditCardPaymentsTableBody.innerHTML = ''; 
+            tableHeader.innerHTML = ''; // Limpiar encabezado de tabla también
+
+            // Construir encabezado de la tabla dinámicamente
+            const headerRow = tableHeader.insertRow();
+            headerRow.insertCell().textContent = 'Mes';
+            creditCards.forEach(card => {
+                const th = headerRow.insertCell();
+                th.textContent = card.name;
+                th.style.color = card.color || '#333';
+            });
+            headerRow.insertCell().textContent = 'Total Mes';
+
+
+            const monthlyData = {}; 
+            const cardDetails = {}; 
+            creditCards.forEach(card => cardDetails[card.id] = { name: card.name, color: card.color });
+
+            creditCards.forEach(card => {
+                card.expenses.forEach(expense => {
+                    for (let i = 0; i < expense.installments; i++) {
+                        const paymentDate = new Date(expense.purchaseDate);
+                        paymentDate.setDate(1); 
+                        paymentDate.setMonth(paymentDate.getMonth() + i);
+                        const monthKey = `${paymentDate.getFullYear()}-${String(paymentDate.getMonth() + 1).padStart(2, '0')}`;
+                        
+                        if (!monthlyData[monthKey]) {
+                            monthlyData[monthKey] = { total: 0, cards: {} };
+                        }
+                        monthlyData[monthKey].total += expense.installmentAmount;
+                        monthlyData[monthKey].cards[card.id] = (monthlyData[monthKey].cards[card.id] || 0) + expense.installmentAmount;
+                    }
+                });
+            });
+
+            const sortedMonths = Object.keys(monthlyData).sort();
+            const labels = [];
+            const datasets = [];
+
+            creditCards.forEach(card => {
+                datasets.push({
+                    label: card.name,
+                    data: [],
+                    backgroundColor: card.color || '#CCCCCC', 
+                    borderColor: card.color || '#CCCCCC',
+                    borderWidth: 1
+                });
+            });
+            
+            let grandTotalAllMonths = 0;
+
+            sortedMonths.forEach(monthKey => {
+                const monthData = monthlyData[monthKey];
+                const [year, monthNum] = monthKey.split('-');
+                const monthName = new Date(year, monthNum - 1, 1).toLocaleString('es-CL', { month: 'long', year: 'numeric' });
+                labels.push(monthName); 
+
+                const row = creditCardPaymentsTableBody.insertRow();
+                row.insertCell().textContent = monthName;
+                
+                let monthTotalForCards = 0;
+                creditCards.forEach((card, cardIndex) => {
+                    const amountForCardInMonth = monthData.cards[card.id] || 0;
+                    row.insertCell().textContent = formatCurrencyCLP(amountForCardInMonth);
+                    datasets[cardIndex].data.push(amountForCardInMonth); 
+                    monthTotalForCards += amountForCardInMonth;
+                });
+                const totalCell = row.insertCell();
+                totalCell.textContent = formatCurrencyCLP(monthTotalForCards);
+                totalCell.classList.add('font-semibold');
+                grandTotalAllMonths += monthTotalForCards;
+            });
+            
+             datasets.forEach(dataset => {
+                while (dataset.data.length < labels.length) {
+                    dataset.data.push(0);
+                }
+            });
+
+            if (sortedMonths.length > 0) {
+                const totalRow = creditCardPaymentsTableBody.insertRow();
+                totalRow.classList.add('font-bold', 'bg-gray-100');
+                const totalLabelCell = totalRow.insertCell();
+                totalLabelCell.textContent = "TOTAL GENERAL";
+                totalLabelCell.colSpan = creditCards.length + 1; 
+                const grandTotalCell = totalRow.insertCell();
+                grandTotalCell.textContent = formatCurrencyCLP(grandTotalAllMonths);
+            }
+
+            if (creditCardChartInstance) {
+                creditCardChartInstance.destroy();
+            }
+            if (labels.length > 0 && creditCardPaymentsChartCanvas) {
+                 const ctx = creditCardPaymentsChartCanvas.getContext('2d');
+                 if (ctx) {
+                     creditCardChartInstance = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: datasets
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: { stacked: true },
+                                y: { stacked: true, beginAtZero: true, ticks: { callback: value => formatCurrencyCLP(value) } }
+                            },
+                            plugins: {
+                                tooltip: { callbacks: { label: context => `${context.dataset.label}: ${formatCurrencyCLP(context.raw)}` } }
+                            }
+                        }
+                    });
+                 } else {
+                    console.warn("renderCreditCardPaymentVisuals: Canvas context not available for chart.");
+                 }
+            }
+        }
+        
+        function renderIncomeSummary() {
+            if (!incomeSummaryTableBody || !mainIncomeInput || !totalGeneralExpensesDisplay || !mainIncomeDateInput) return;
+            incomeSummaryTableBody.innerHTML = '';
+
+            const incomeAmount = parseCurrencyCLP(mainIncomeInput.value);
+            const incomeDateStr = mainIncomeDateInput.value;
+            const incomeDate = incomeDateStr ? new Date(incomeDateStr + 'T00:00:00') : new Date(); 
+            const totalExpenses = parseCurrencyCLP(totalGeneralExpensesDisplay.textContent);
+            const remainingBalance = incomeAmount - totalExpenses;
+
+            const row = incomeSummaryTableBody.insertRow();
+            row.insertCell().textContent = incomeDate.toLocaleDateString('es-CL', { year: 'numeric', month: 'long', day: 'numeric' });
+            row.insertCell().textContent = formatCurrencyCLP(incomeAmount);
+            row.insertCell().textContent = formatCurrencyCLP(totalExpenses);
+            const balanceCell = row.insertCell();
+            balanceCell.textContent = formatCurrencyCLP(remainingBalance);
+            balanceCell.classList.toggle('text-red-600', remainingBalance < 0);
+            balanceCell.classList.toggle('text-green-600', remainingBalance >= 0);
+        }
+
+        async function saveFinancialData() { 
+            if (!userId || !db) { showMessage(!userId ? "Debes estar autenticado para guardar." : "Base de datos no lista.", "error", messageAreaApp); return; } 
+            if (!mainIncomeInput || !mainIncomeDateInput) { showMessage("Elementos de la interfaz no están listos para guardar.", "error", messageAreaApp); return; } 
+            updateGeneralExpensesFromDOM(); 
+            const dataToSave = { 
+                mainIncome: { amount: parseCurrencyCLP(mainIncomeInput.value), date: mainIncomeDateInput.value }, 
+                categories: categories, 
+                generalExpenses: generalExpenses, 
+                creditCards: creditCards, 
+                lastUpdated: new Date().toISOString() 
+            }; 
+            const docRef = doc(db, "artifacts", appIdPath, "users", userId, "financialData", "main"); 
+            try { await setDoc(docRef, dataToSave); showMessage("Datos guardados exitosamente.", "success", messageAreaApp); } 
+            catch (error) { console.error("Error al guardar:", error); showMessage(`Error al guardar: ${error.message}`, "error", messageAreaApp); }
+        }
+
+        function loadFinancialData() { 
+            if (!userId || !db) {console.warn("loadFinancialData: No userId or db."); return;} 
+            if (financialDataUnsubscribe) financialDataUnsubscribe(); 
+            const docRef = doc(db, "artifacts", appIdPath, "users", userId, "financialData", "main"); 
+            financialDataUnsubscribe = onSnapshot(docRef, (docSnap) => { 
+                if (!mainIncomeInput || !mainIncomeDateInput || !expensesList) { console.warn("loadFinancialData: DOM not fully ready for update from Firestore."); return; } 
+                if (docSnap.exists()) { 
+                    const data = docSnap.data(); 
+                    console.log("Datos cargados:", data); 
+                    mainIncome = data.mainIncome || { amount: 0, date: new Date().toISOString().split('T')[0] };
+                    mainIncomeInput.value = formatCurrencyCLP(mainIncome.amount, false); 
+                    mainIncomeDateInput.value = mainIncome.date;
+                    if (mainIncomeInput.onblur) mainIncomeInput.onblur({target: mainIncomeInput}); 
+                    
+                    categories = data.categories || [{ id: crypto.randomUUID(), name: "General" }]; 
+                    generalExpenses = data.generalExpenses || []; 
+                    creditCards = data.creditCards || []; 
+                    renderCategories(); 
+                    expensesList.innerHTML = ''; 
+                    if (generalExpenses.length > 0) { generalExpenses.forEach(exp => addGeneralExpenseItem(exp.id, exp.name, exp.amount, exp.category)); } 
+                    else { addGeneralExpenseItem(); } 
+                    renderCreditCards(); 
+                    updateCardForExpenseSelect(); 
+                    calculateAndRenderAll(); 
+                    showMessage("Datos cargados.", "success", messageAreaApp); 
+                } else { 
+                    showMessage("No hay datos guardados para este usuario. ¡Empieza a añadir!", "info", messageAreaApp); 
+                    mainIncome = { amount: 0, date: new Date().toISOString().split('T')[0] };
+                    mainIncomeInput.value = ''; 
+                    mainIncomeDateInput.value = mainIncome.date;
+                    if (mainIncomeInput.onblur) mainIncomeInput.onblur({target: mainIncomeInput}); 
+                    categories = [{id: crypto.randomUUID(), name: "General"}]; 
+                    generalExpenses = []; 
+                    creditCards = []; 
+                    renderCategories(); 
+                    expensesList.innerHTML = ''; 
+                    addGeneralExpenseItem(); 
+                    renderCreditCards(); 
+                    updateCardForExpenseSelect(); 
+                    calculateAndRenderAll(); 
+                } 
+            }, (error) => { console.error("Error al cargar:", error); showMessage(`Error al cargar: ${error.message}`, "error", messageAreaApp); });
+        }
+        function showMessage(message, type = "info", area = messageAreaApp) { if (!area) { console.warn("showMessage: messageArea no disponible para:", message); return;} area.textContent = message; area.className = 'p-3 rounded-md text-sm mb-4 transition-opacity duration-300 opacity-100'; const colors = { success: 'bg-green-100 text-green-700', error: 'bg-red-100 text-red-700', warn: 'bg-yellow-100 text-yellow-700', info: 'bg-blue-100 text-blue-700' }; area.classList.add(...(colors[type] || colors.info).split(' ')); setTimeout(() => { if(area) { area.classList.remove('opacity-100'); area.classList.add('opacity-0'); setTimeout(() => { if(area && area.textContent === message) { area.textContent = ''; area.className = 'p-3 rounded-md text-sm mb-4'; }}, 300); } }, 5000);}
+        function openModal(modalElement) { if(modalElement) modalElement.classList.remove('hidden'); }
+        function closeModal(modalElement) { if(modalElement) modalElement.classList.add('hidden'); }
+        function exportToCSV() { if (!mainIncomeInput || !totalGeneralExpensesDisplay || !balanceDisplay) { showMessage("Datos no listos para exportar.", "warn", messageAreaApp); return; } let csvContent = "data:text/csv;charset=utf-8,"; const escapeCSV = (text) => `"${String(text || '').replace(/"/g, '""')}"`; csvContent += "Tipo,Fecha,Categoría/Tarjeta,Descripción,Cuotas,Monto CLP\r\n"; csvContent += `Ingreso Principal,${escapeCSV(new Date(mainIncome.date+'T00:00:00').toLocaleDateString('es-CL'))},Principal,Ingreso/Aporte,,${escapeCSV(formatCurrencyCLP(mainIncome.amount))}\r\n`; generalExpenses.forEach(exp => { csvContent += `Gasto General,,${escapeCSV(exp.category)},${escapeCSV(exp.name)},-,${escapeCSV(formatCurrencyCLP(exp.amount))}\r\n`; }); creditCards.forEach(card => { card.expenses.forEach(exp => { csvContent += `Gasto Tarjeta,${escapeCSV(new Date(exp.purchaseDate).toLocaleDateString('es-CL'))},${escapeCSV(card.name)},${escapeCSV(exp.description)},${exp.installments} de ${formatCurrencyCLP(exp.installmentAmount)},${escapeCSV(formatCurrencyCLP(exp.totalAmount))}\r\n`; }); }); csvContent += "\r\nResumen,,,,\r\n"; csvContent += `Total Ingreso Principal,,,,${escapeCSV(formatCurrencyCLP(mainIncome.amount))}\r\n`; csvContent += `Total Gastos Generales,,,,${escapeCSV(totalGeneralExpensesDisplay.textContent)}\r\n`; csvContent += `Balance (Ingreso - Gasto General),,,,${escapeCSV(balanceDisplay.textContent)}\r\n`; const encodedUri = encodeURI(csvContent); const link = document.createElement("a"); link.setAttribute("href", encodedUri); link.setAttribute("download", `control_gastos_${new Date().toISOString().split('T')[0]}.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link); showMessage("Datos exportados a CSV.", "success", messageAreaApp);}
+
+        // --- Gemini API Functions ---
+        async function suggestCategoryWithGemini(expenseName, existingCategories) {
+            const prompt = `Dada la siguiente lista de categorías de gastos: ${existingCategories.join(', ')}. Y el nombre de un gasto: '${expenseName}'. ¿Cuál de las categorías existentes sería la más apropiada? Si ninguna es muy apropiada o no estás seguro, sugiere 'General'. Responde solo con el nombre exacto de la categoría sugerida.`;
+            let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+            const payload = { contents: chatHistory };
+            const apiKey = ""; // Provided by Canvas environment
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error("Error de API Gemini (sugerir categoría):", response.status, errorData);
+                    throw new Error(`Error de API: ${response.status} ${errorData.error?.message || 'Unknown error'}`);
+                }
+                const result = await response.json();
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    let suggestedCategory = result.candidates[0].content.parts[0].text.trim();
+                    // Ensure the suggested category is one of the existing ones or "General"
+                    if (!existingCategories.includes(suggestedCategory) && suggestedCategory !== "General") {
+                        // If Gemini suggests something totally new, and we want to stick to existing, default to General
+                        // Or, we could add logic to ask the user if they want to create this new category.
+                        // For now, defaulting to General if not in the list.
+                        if (existingCategories.find(cat => suggestedCategory.toLowerCase().includes(cat.toLowerCase()))) {
+                           suggestedCategory = existingCategories.find(cat => suggestedCategory.toLowerCase().includes(cat.toLowerCase()));
+                        } else {
+                           suggestedCategory = "General";
+                        }
+                    }
+                    return suggestedCategory;
+                }
+            } catch (error) {
+                console.error("Error al llamar a Gemini API (sugerir categoría):", error);
+                throw error; // Re-throw para que el llamador lo maneje
+            }
+            return "General"; // Fallback
+        }
+
+        async function analyzeExpensesWithGemini() {
+            if (analysisLoadingIndicator) analysisLoadingIndicator.classList.remove('hidden');
+            if (analysisResultText) analysisResultText.innerHTML = '';
+
+            let totalCreditCardSpendingThisMonth = 0;
+            const today = new Date();
+            const currentMonth = today.getMonth();
+            const currentYear = today.getFullYear();
+
+            creditCards.forEach(card => {
+                card.expenses.forEach(exp => {
+                    for (let i = 0; i < exp.installments; i++) {
+                        const paymentDate = new Date(exp.purchaseDate);
+                        paymentDate.setMonth(paymentDate.getMonth() + i);
+                        if (paymentDate.getMonth() === currentMonth && paymentDate.getFullYear() === currentYear) {
+                            totalCreditCardSpendingThisMonth += exp.installmentAmount;
+                        }
+                    }
+                });
+            });
+            
+            const expensesSummary = generalExpenses.map(exp => `- ${exp.name} (${exp.category}): ${formatCurrencyCLP(exp.amount)}`).join('\n');
+            const prompt = `Soy un usuario de una app de control de gastos. Mis gastos generales de este mes son:\n${expensesSummary}\n\nAdemás, este mes tengo pagos en tarjetas de crédito por un total de: ${formatCurrencyCLP(totalCreditCardSpendingThisMonth)}.\nMi ingreso principal registrado fue de ${formatCurrencyCLP(mainIncome.amount)} en la fecha ${mainIncome.date}.\n\nPor favor, analiza brevemente mis patrones de gasto y dame 2 o 3 consejos de ahorro personalizados y accionables basados en esta información. Sé conciso y amigable. Formatea tu respuesta usando Markdown simple (por ejemplo, usa asteriscos para listas).`;
+
+            let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+            const payload = { contents: chatHistory };
+            const apiKey = ""; // Provided by Canvas environment
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                 if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error("Error de API Gemini (analizar gastos):", response.status, errorData);
+                    throw new Error(`Error de API: ${response.status} ${errorData.error?.message || 'Unknown error'}`);
+                }
+                const result = await response.json();
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const analysisText = result.candidates[0].content.parts[0].text;
+                    // Simple Markdown to HTML (bold and lists)
+                    let htmlResult = analysisText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); // Bold
+                    htmlResult = htmlResult.replace(/^\* (.*$)/gm, '<li>$1</li>'); // List items
+                    htmlResult = htmlResult.replace(/(\r\n|\n|\r)/gm, '<br>'); // Newlines
+                     // Wrap list items in ul if any
+                    if (htmlResult.includes('<li>')) {
+                        htmlResult = `<ul>${htmlResult.replace(/<br><li>/g, '<li>').replace(/<\/li><br>/g, '</li>')}</ul>`.replace(/<\/li><br><ul>/g, '</li></ul><ul>');
+                    }
+                    if (analysisResultText) analysisResultText.innerHTML = htmlResult;
+                } else {
+                     if (analysisResultText) analysisResultText.textContent = "No se pudo obtener el análisis en este momento.";
+                }
+            } catch (error) {
+                console.error("Error al llamar a Gemini API (analizar gastos):", error);
+                if (analysisResultText) analysisResultText.textContent = "Error al contactar al asistente de IA para el análisis.";
+            } finally {
+                if (analysisLoadingIndicator) analysisLoadingIndicator.classList.add('hidden');
+                if (analysisResultModal) openModal(analysisResultModal);
+            }
+        }
+
+
+        function setupEventListeners() {
+            let allCriticalElementsFound = true;
+            const criticalElementMappings = { mainIncomeInput: 'mainIncomeInput', mainIncomeDateInput: 'mainIncomeDateInput', saveMainIncomeButton: 'saveMainIncomeButton', addCategoryButton: 'addCategoryButton', newCategoryInput: 'newCategoryInput', addExpenseButton: 'addExpense', saveButton: 'saveData', exportButton: 'exportToCsv', addCardButton: 'addCardButton', newCardNameInput: 'newCardNameInput', newCardColorInput: 'newCardColorInput', openAddCreditExpenseModalButton: 'openAddCreditExpenseModalButton', closeCreditExpenseModalButton: 'closeCreditExpenseModalButton', creditExpenseForm: 'creditExpenseForm', creditExpensePurchaseDate: 'creditExpensePurchaseDate', creditExpenseAmount: 'creditExpenseAmount', loginForm: 'loginForm', registerForm: 'registerForm', showRegisterFormButton: 'showRegisterFormButton', showLoginFormButton: 'showLoginFormButton', logoutButton: 'logoutButton', emailInputLogin:'emailInputLogin', passwordInputLogin:'passwordInputLogin', emailInputRegister:'emailInputRegister', passwordInputRegister:'passwordInputRegister', passwordConfirmInputRegister:'passwordConfirmInputRegister', analyzeExpensesButton: 'analyzeExpensesButton', closeAnalysisResultModalButton: 'closeAnalysisResultModalButton' };
+            const elementsToAttachListenersTo = { mainIncomeInput, mainIncomeDateInput, saveMainIncomeButton, addCategoryButton, newCategoryInput, addExpenseButton, saveButton, exportButton, addCardButton, newCardNameInput, newCardColorInput, openAddCreditExpenseModalButton, closeCreditExpenseModalButton, creditExpenseForm, creditExpensePurchaseDate, creditExpenseAmount, loginForm, registerForm, emailInputLogin, passwordInputLogin, emailInputRegister, passwordInputRegister, passwordConfirmInputRegister, showRegisterFormButton, showLoginFormButton, logoutButton, analyzeExpensesButton, closeAnalysisResultModalButton };
+
+            for (const varName in criticalElementMappings) {
+                if (!elementsToAttachListenersTo[varName]) { 
+                    console.error(`setupEventListeners: Elemento crítico '${varName}' (esperado con ID: '${criticalElementMappings[varName]}') no fue encontrado.`);
+                    allCriticalElementsFound = false;
+                }
+            }
+            if (!allCriticalElementsFound) { console.error("setupEventListeners: Uno o más elementos críticos del DOM no fueron encontrados. La app podría no funcionar correctamente.");}
+
+            applyAmountFormattingListeners(mainIncomeInput);
+            applyAmountFormattingListeners(creditExpenseAmount); 
+
+            if(addCategoryButton) addCategoryButton.addEventListener('click', addCategory);
+            if(newCategoryInput) newCategoryInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addCategory(); });
+            if(addExpenseButton) addExpenseButton.addEventListener('click', () => { addGeneralExpenseItem(); updateGeneralExpensesFromDOM(); calculateAndRenderAll(); });
+            if(saveButton) saveButton.addEventListener('click', saveFinancialData);
+            if(exportButton) exportButton.addEventListener('click', exportToCSV);
+            if(addCardButton) addCardButton.addEventListener('click', addCreditCard);
+            if(newCardNameInput) newCardNameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addCreditCard(); });
+            if(openAddCreditExpenseModalButton) openAddCreditExpenseModalButton.addEventListener('click', () => openModal(addCreditExpenseModal));
+            if(closeCreditExpenseModalButton) closeCreditExpenseModalButton.addEventListener('click', () => closeModal(addCreditExpenseModal)); 
+            if(creditExpenseForm) creditExpenseForm.addEventListener('submit', handleAddCreditExpense);
+            if(creditExpensePurchaseDate) creditExpensePurchaseDate.valueAsDate = new Date();
+            if(saveMainIncomeButton) saveMainIncomeButton.addEventListener('click', () => { showMessage("Guardando ingreso...", "info", messageAreaApp); mainIncome.amount = parseCurrencyCLP(mainIncomeInput.value); mainIncome.date = mainIncomeDateInput.value; saveFinancialData(); });
+            
+            if(mainIncomeInput) mainIncomeInput.addEventListener('change', calculateAndRenderAll);
+            if(mainIncomeDateInput) mainIncomeDateInput.addEventListener('change', calculateAndRenderAll);
+            
+            // Auth listeners
+            if(loginForm) loginForm.addEventListener('submit', handleLogin);
+            if(registerForm) registerForm.addEventListener('submit', handleRegistration);
+            if(logoutButton) logoutButton.addEventListener('click', handleLogout);
+            if(showRegisterFormButton) showRegisterFormButton.addEventListener('click', () => { if(loginForm) loginForm.classList.add('hidden'); if(registerForm) registerForm.classList.remove('hidden'); });
+            if(showLoginFormButton) showLoginFormButton.addEventListener('click', () => { if(registerForm) registerForm.classList.add('hidden'); if(loginForm) loginForm.classList.remove('hidden'); });
+        
+            // Gemini API listeners
+            if(analyzeExpensesButton) analyzeExpensesButton.addEventListener('click', analyzeExpensesWithGemini);
+            if(closeAnalysisResultModalButton) closeAnalysisResultModalButton.addEventListener('click', () => closeModal(analysisResultModal));
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            authContainer = document.getElementById('authContainer');
+            appContainer = document.getElementById('appContainer');
+            userDisplayArea = document.getElementById('userDisplayArea');
+            loginForm = document.getElementById('loginForm');
+            registerForm = document.getElementById('registerForm');
+            emailInputLogin = document.getElementById('emailInputLogin');
+            passwordInputLogin = document.getElementById('passwordInputLogin');
+            emailInputRegister = document.getElementById('emailInputRegister');
+            passwordInputRegister = document.getElementById('passwordInputRegister');
+            passwordConfirmInputRegister = document.getElementById('passwordConfirmInputRegister'); 
+            showRegisterFormButton = document.getElementById('showRegisterFormButton');
+            showLoginFormButton = document.getElementById('showLoginFormButton');
+            logoutButton = document.getElementById('logoutButton');
+
+            mainIncomeInput = document.getElementById('mainIncomeInput');
+            mainIncomeDateInput = document.getElementById('mainIncomeDateInput');
+            expensesList = document.getElementById('expensesList');
+            addExpenseButton = document.getElementById('addExpense');
+            totalGeneralExpensesDisplay = document.getElementById('totalGeneralExpenses');
+            balanceDisplay = document.getElementById('balance');
+            saveButton = document.getElementById('saveData');
+            userIdDisplay = document.getElementById('userIdDisplay'); 
+            messageArea = document.getElementById('messageArea'); 
+            messageAreaApp = document.getElementById('messageAreaApp'); 
+            newCategoryInput = document.getElementById('newCategoryInput');
+            addCategoryButton = document.getElementById('addCategoryButton');
+            categoriesListDisplay = document.getElementById('categoriesListDisplay');
+            exportButton = document.getElementById('exportToCsv');
+            
+            creditCardPaymentsChartCanvas = document.getElementById('creditCardPaymentsChart');
+            creditCardPaymentsTableBody = document.getElementById('creditCardPaymentsTableBody');
+
+            newCardNameInput = document.getElementById('newCardNameInput');
+            newCardColorInput = document.getElementById('newCardColorInput');
+            addCardButton = document.getElementById('addCardButton');
+            creditCardsListContainer = document.getElementById('creditCardsListContainer');
+            addCreditExpenseModal = document.getElementById('addCreditExpenseModal');
+            closeCreditExpenseModalButton = document.getElementById('closeCreditExpenseModalButton'); 
+            creditExpenseForm = document.getElementById('creditExpenseForm');
+            cardForExpenseSelect = document.getElementById('cardForExpenseSelect');
+            creditExpenseDescription = document.getElementById('creditExpenseDescription');
+            creditExpenseAmount = document.getElementById('creditExpenseAmount');
+            creditExpenseInstallments = document.getElementById('creditExpenseInstallments');
+            creditExpensePurchaseDate = document.getElementById('creditExpensePurchaseDate');
+            creditExpenseNotes = document.getElementById('creditExpenseNotes');
+            openAddCreditExpenseModalButton = document.getElementById('openAddCreditExpenseModalButton');
+            saveMainIncomeButton = document.getElementById('saveMainIncomeButton');
+
+            incomeSummaryTableBody = document.getElementById('incomeSummaryTableBody');
+
+            // Gemini API related DOM Elements
+            analyzeExpensesButton = document.getElementById('analyzeExpensesButton');
+            analysisResultModal = document.getElementById('analysisResultModal');
+            analysisResultText = document.getElementById('analysisResultText');
+            closeAnalysisResultModalButton = document.getElementById('closeAnalysisResultModalButton');
+            analysisLoadingIndicator = document.getElementById('analysisLoadingIndicator');
+            
+            setupEventListeners();
+        });
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .container { max-width: 1100px; } 
+        .auth-form { max-width: 400px; }
+        .scrollable-list { max-height: 250px; overflow-y: auto; }
+        #creditCardPaymentsChartContainer { position: relative; height:300px; width:100%;}
+        .modal { background-color: rgba(0,0,0,0.5); }
+        .modal-content { max-height: 90vh; overflow-y: auto; }
+        table th, table td { padding: 0.5rem 0.75rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
+        table th { background-color: #f9fafb; font-weight: 600; }
+        .suggest-category-btn svg { pointer-events: none; } /* Para que el clic llegue al botón */
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4 sm:p-6">
+
+    <div id="authContainer" class="container mx-auto bg-white p-6 sm:p-8 rounded-xl shadow-2xl w-full auth-form">
+        <h1 class="text-3xl font-bold text-indigo-700 text-center mb-8">Control de Gastos Pro</h1>
+        <form id="loginForm" class="space-y-6">
+            <h2 class="text-2xl font-semibold text-gray-700 text-center">Iniciar Sesión</h2>
+            <div><label for="emailInputLogin" class="block text-sm font-medium text-gray-700">Correo Electrónico</label><input type="email" id="emailInputLogin" autocomplete="email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></div>
+            <div><label for="passwordInputLogin" class="block text-sm font-medium text-gray-700">Contraseña</label><input type="password" id="passwordInputLogin" autocomplete="current-password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></div>
+            <div><button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Ingresar</button></div>
+            <p class="text-center text-sm text-gray-600">¿No tienes cuenta? <button type="button" id="showRegisterFormButton" class="font-medium text-indigo-600 hover:text-indigo-500">Regístrate aquí</button></p>
+        </form>
+        <form id="registerForm" class="space-y-6 hidden">
+            <h2 class="text-2xl font-semibold text-gray-700 text-center">Crear Cuenta</h2>
+            <div><label for="emailInputRegister" class="block text-sm font-medium text-gray-700">Correo Electrónico</label><input type="email" id="emailInputRegister" autocomplete="email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></div>
+            <div><label for="passwordInputRegister" class="block text-sm font-medium text-gray-700">Contraseña</label><input type="password" id="passwordInputRegister" autocomplete="new-password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" minlength="6"><p class="mt-1 text-xs text-gray-500">Mínimo 6 caracteres.</p></div>
+            <div><label for="passwordConfirmInputRegister" class="block text-sm font-medium text-gray-700">Confirmar Contraseña</label><input type="password" id="passwordConfirmInputRegister" autocomplete="new-password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" minlength="6"></div>
+            <div><button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">Registrarse</button></div>
+            <p class="text-center text-sm text-gray-600">¿Ya tienes cuenta? <button type="button" id="showLoginFormButton" class="font-medium text-indigo-600 hover:text-indigo-500">Inicia sesión aquí</button></p>
+        </form>
+         <div id="messageArea" class="p-3 rounded-md text-sm mt-6 mb-0" role="alert"></div> 
+    </div>
+
+    <div id="appContainer" class="container mx-auto bg-white p-6 sm:p-8 rounded-xl shadow-2xl w-full hidden">
+        <header class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+            <h1 class="text-2xl sm:text-3xl font-bold text-indigo-700 mb-2 sm:mb-0">Control de Gastos Pro</h1>
+            <div id="userDisplayArea" class="text-left sm:text-right">
+                <p id="userIdDisplay" class="text-sm text-gray-600">Cargando usuario...</p>
+                <button id="logoutButton" class="mt-1 text-xs text-indigo-600 hover:text-indigo-800 underline">Cerrar Sesión</button>
+            </div>
+        </header>
+
+        <div id="messageAreaApp" class="p-3 rounded-md text-sm mb-4" role="alert"></div> 
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+            <div class="lg:col-span-1 space-y-6">
+                <section class="p-4 bg-green-50 rounded-lg shadow">
+                    <h2 class="text-xl font-semibold text-green-600 mb-3">Ingreso/Aporte Principal</h2>
+                    <div class="space-y-3">
+                        <div>
+                            <label for="mainIncomeInput" class="block text-sm font-medium text-gray-700">Monto del Ingreso (CLP)</label>
+                            <input type="text" inputmode="text" id="mainIncomeInput" placeholder="Ej: 1.000.000" class="mt-1 w-full p-3 border border-gray-300 rounded-md shadow-sm text-lg">
+                        </div>
+                        <div>
+                            <label for="mainIncomeDateInput" class="block text-sm font-medium text-gray-700">Fecha del Ingreso</label>
+                            <input type="date" id="mainIncomeDateInput" class="mt-1 w-full p-3 border border-gray-300 rounded-md shadow-sm text-lg">
+                        </div>
+                        <button id="saveMainIncomeButton" class="w-full mt-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md">Guardar Ingreso</button>
+                    </div>
+                </section>
+
+                <section class="p-4 bg-rose-50 rounded-lg shadow">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold text-rose-600">Gastos Generales</h2>
+                        <button id="addExpense" class="bg-rose-500 hover:bg-rose-600 text-white font-semibold py-2 px-4 rounded-md text-sm">
+                            + Añadir Gasto
+                        </button>
+                    </div>
+                    <div id="expensesList" class="space-y-2 scrollable-list pr-2"></div>
+                </section>
+                 <section class="p-4 bg-sky-50 rounded-lg shadow">
+                    <h2 class="text-xl font-semibold text-sky-600 mb-3">Categorías de Gastos</h2>
+                    <div class="flex flex-col sm:flex-row items-center gap-3 mb-3">
+                        <input type="text" id="newCategoryInput" placeholder="Nueva categoría" class="flex-grow p-2 border rounded-md">
+                        <button id="addCategoryButton" class="bg-sky-500 hover:bg-sky-600 text-white font-semibold py-2 px-4 rounded-md w-full sm:w-auto">
+                            + Añadir Categoría
+                        </button>
+                    </div>
+                    <div id="categoriesListDisplay" class="flex flex-wrap gap-2 p-2 bg-white rounded-md border min-h-[40px]"></div>
+                </section>
+            </div>
+
+            <div class="lg:col-span-2 space-y-6">
+                 <section class="p-4 bg-indigo-50 rounded-lg shadow">
+                    <h2 class="text-xl font-semibold text-indigo-600 mb-3">Resumen de Ingresos y Saldos</h2>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 text-sm">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">Fecha Ingreso</th>
+                                    <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">Monto Ingreso</th>
+                                    <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">Gastos Generales</th>
+                                    <th class="px-4 py-2 text-left font-medium text-gray-500 uppercase tracking-wider">Saldo Restante</th>
+                                </tr>
+                            </thead>
+                            <tbody id="incomeSummaryTableBody" class="bg-white divide-y divide-gray-200">
+                                </tbody>
+                        </table>
+                    </div>
+                     <div class="mt-4 text-center">
+                        <p class="text-lg">Total Gastos Generales: <strong id="totalGeneralExpenses" class="text-rose-600">$0</strong></p>
+                        <p class="text-lg">Balance (Ingreso - Gastos): <strong id="balance" class="text-gray-800">$0</strong></p>
+                    </div>
+                </section>
+            </div>
+        </div>
+        
+        <section class="mt-12 p-6 bg-blue-50 rounded-lg shadow"> {/* Aumentado margen superior */}
+            <h2 class="text-2xl font-semibold text-blue-700 mb-6 text-center">Gestión de Tarjetas de Crédito</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="md:col-span-1 space-y-4">
+                    <h3 class="text-lg font-medium text-blue-600 mb-2">Añadir Tarjeta de Crédito</h3>
+                    <div class="flex flex-col sm:flex-row items-start gap-2">
+                        <input type="text" id="newCardNameInput" placeholder="Nombre Tarjeta (Ej: Visa Banco X)" class="flex-grow p-2 border rounded-md mb-2 sm:mb-0">
+                        <div class="flex items-center gap-2">
+                            <label for="newCardColorInput" class="text-sm">Color:</label>
+                            <input type="color" id="newCardColorInput" value="#4299E1" class="p-1 h-8 w-14 block bg-white border border-gray-300 rounded-md shadow-sm cursor-pointer">
+                        </div>
+                        <button id="addCardButton" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-3 rounded-md text-sm w-full sm:w-auto">Añadir Tarjeta</button>
+                    </div>
+                     <button id="openAddCreditExpenseModalButton" class="w-full mt-3 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md text-sm">
+                        + Registrar Gasto en Tarjeta
+                    </button>
+                </div>
+                <div id="creditCardsListContainer" class="md:col-span-2 space-y-4 scrollable-list pr-1">
+                    </div>
+            </div>
+            <div class="mt-8"> 
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium text-blue-600 mb-2">Pagos Mensuales Totales (Todas las Tarjetas)</h3>
+                    <div id="creditCardPaymentsChartContainer" class="bg-white p-2 rounded-md shadow">
+                        <canvas id="creditCardPaymentsChart"></canvas>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium text-blue-600 mb-2">Detalle Pagos Próximos Meses</h3>
+                    <div class="overflow-x-auto bg-white p-2 rounded-md shadow">
+                        <table class="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
+                            <thead id="creditCardPaymentsTableHeader">
+                                </thead>
+                            <tbody id="creditCardPaymentsTableBody" class="divide-y divide-gray-200">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div id="addCreditExpenseModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center hidden z-50">
+            <div class="relative mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white modal-content">
+                <div class="flex justify-between items-center mb-4"> <h3 class="text-xl font-semibold text-gray-900">Añadir Gasto en Tarjeta de Crédito</h3> <button id="closeCreditExpenseModalButton" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center"> <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg> </button> </div>
+                <form id="creditExpenseForm" class="space-y-4">
+                    <div> <label for="cardForExpenseSelect" class="block mb-1 text-sm font-medium text-gray-700">Tarjeta de Crédito*</label> <select id="cardForExpenseSelect" required class="w-full p-2 border border-gray-300 rounded-md shadow-sm"></select> </div>
+                    <div> <label for="creditExpenseDescription" class="block mb-1 text-sm font-medium text-gray-700">Descripción del Gasto*</label> <input type="text" id="creditExpenseDescription" required class="w-full p-2 border border-gray-300 rounded-md shadow-sm"> </div>
+                    <div> <label for="creditExpenseAmount" class="block mb-1 text-sm font-medium text-gray-700">Monto Total (CLP)*</label> <input type="text" inputmode="text" id="creditExpenseAmount" required placeholder="Ej: 50.000" class="w-full p-2 border border-gray-300 rounded-md shadow-sm"> </div>
+                    <div> <label for="creditExpenseInstallments" class="block mb-1 text-sm font-medium text-gray-700">Número de Cuotas* (1 para pago único)</label> <input type="number" id="creditExpenseInstallments" value="1" min="1" required class="w-full p-2 border border-gray-300 rounded-md shadow-sm"> </div>
+                    <div> <label for="creditExpensePurchaseDate" class="block mb-1 text-sm font-medium text-gray-700">Fecha de Compra*</label> <input type="date" id="creditExpensePurchaseDate" required class="w-full p-2 border border-gray-300 rounded-md shadow-sm"> </div>
+                    <div> <label for="creditExpenseNotes" class="block mb-1 text-sm font-medium text-gray-700">Notas (Opcional)</label> <textarea id="creditExpenseNotes" rows="2" class="w-full p-2 border border-gray-300 rounded-md shadow-sm"></textarea> </div>
+                    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md">Guardar Gasto de Tarjeta</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="analysisResultModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto h-full w-full flex items-center justify-center hidden z-50 p-4">
+            <div class="relative mx-auto p-6 border w-full max-w-2xl shadow-lg rounded-md bg-white modal-content">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold text-gray-900">✨ Análisis de Gastos y Consejos de Ahorro</h3>
+                    <button id="closeAnalysisResultModalButton" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                    </button>
+                </div>
+                <div id="analysisLoadingIndicator" class="text-center py-4 hidden">
+                    <svg class="animate-spin h-8 w-8 text-indigo-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <p class="text-indigo-600 mt-2">Analizando tus gastos con IA...</p>
+                </div>
+                <div id="analysisResultText" class="text-sm text-gray-700 space-y-2">
+                    </div>
+            </div>
+        </div>
+
+
+        <div class="text-center mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
+            <button id="saveData" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg">Guardar Todos los Datos</button>
+            <button id="analyzeExpensesButton" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3L12 21M12 3L15.35 6.35M12 3L8.65 6.35M12 21L15.35 17.65M12 21L8.65 17.65M3 12L21 12M3 12L6.35 15.35M3 12L6.35 8.65M21 12L17.65 15.35M21 12L17.65 8.65M12 5.5C12.8284 5.5 13.5 4.82843 13.5 4C13.5 3.17157 12.8284 2.5 12 2.5C11.1716 2.5 10.5 3.17157 10.5 4C10.5 4.82843 11.1716 5.5 12 5.5ZM12 12.5C12.8284 12.5 13.5 11.8284 13.5 11C13.5 10.1716 12.8284 9.5 12 9.5C11.1716 9.5 10.5 10.1716 10.5 11C10.5 11.8284 11.1716 12.5 12 12.5ZM12 19.5C12.8284 19.5 13.5 18.8284 13.5 18C13.5 17.1716 12.8284 16.5 12 16.5C11.1716 16.5 10.5 17.1716 10.5 18C10.5 18.8284 11.1716 19.5 12 19.5Z"></path></svg>
+                Analizar Gastos y Consejos
+            </button>
+            <button id="exportToCsv" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg">Exportar a CSV</button>
+        </div>
+        
+        <footer class="mt-12 text-center text-xs text-gray-500">
+            <p>Control de Gastos Pro v1.4.0</p> 
+        </footer>
+    </div>
+</body>
+</html>
+Set TESTING_MODE to fal
