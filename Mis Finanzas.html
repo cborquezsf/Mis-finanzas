@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Gastos Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script type="module">
+        // Firebase Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Config
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "YOUR_API_KEY", authDomain: "YOUR_AUTH_DOMAIN", projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET", messagingSenderId: "YOUR_MESSAGING_SENDER_ID", appId: "YOUR_APP_ID"
+        };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-gastos-pro-app';
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        setLogLevel('debug');
+
+        let userId = null;
+        let financialDataUnsubscribe = null;
+        
+        // Global state for financial data
+        let categories = [{ id: crypto.randomUUID(), name: "General" }];
+        let generalExpenses = [];
+        let creditCards = []; 
+        let totalFund = 0;
+        let income = 0; 
+
+        // DOM Elements - Declare with let, assign in DOMContentLoaded
+        let incomeInput;
+        let totalFundInput;
+        let expensesList;
+        let addExpenseButton;
+        let totalIncomeDisplay; 
+        let totalExpensesDisplay; 
+        let balanceDisplay; 
+        let saveButton;
+        let userIdDisplay;
+        let messageArea;
+        
+        let newCategoryInput;
+        let addCategoryButton;
+        let categoriesListDisplay;
+        
+        let exportButton;
+
+        let fundUsageChartCanvas;
+        let fundSummaryTotal;
+        let fundSummarySpent;
+        let fundSummaryRemaining;
+        let fundChartInstance = null;
+
+        // Credit Card DOM Elements - Declare with let, assign in DOMContentLoaded
+        let newCardNameInput;
+        let addCardButton;
+        let creditCardsListContainer;
+        let addCreditExpenseModal;
+        let closeCreditExpenseModalButton;
+        let creditExpenseForm;
+        let cardForExpenseSelect;
+        let creditExpenseDescription;
+        let creditExpenseAmount;
+        let creditExpenseInstallments;
+        let creditExpensePurchaseDate;
+        let creditExpenseNotes;
+        let openAddCreditExpenseModalButton;
+        
+        // Buttons for individual save
+        let saveTotalFundButton;
+        let saveIncomeButton;
+
+
+        // --- Utility Functions ---
+        function formatCurrencyCLP(value, includeSymbol = true) {
+            const num = Math.round(parseFloat(value));
+            if (isNaN(num)) return includeSymbol ? "$0" : "0";
+            const formattedNum = num.toLocaleString('es-CL');
+            return includeSymbol ? `$${formattedNum}` : formattedNum;
+        }
+
+        function parseCurrencyCLP(value) {
+            if (typeof value !== 'string') return parseFloat(value) || 0;
+            return parseFloat(value.replace(/\$/g, '').replace(/\./g, '').replace(/,/g, '.')) || 0;
+        }
+
+        function applyAmountFormattingListeners(inputElement) {
+            if (!inputElement) return;
+
+            inputElement.addEventListener('input', function(e) {
+                let value = e.target.value;
+                let rawValue = value.replace(/[^\d]/g, ''); 
+                
+                let currentCursorPos = e.target.selectionStart;
+                let oldValueLength = value.length;
+
+                if (rawValue) {
+                    const num = parseInt(rawValue, 10);
+                    e.target.value = num.toLocaleString('es-CL');
+                } else {
+                    e.target.value = ''; 
+                }
+                
+                // Intento de restaurar la posición del cursor de forma más inteligente
+                let newValueLength = e.target.value.length;
+                if (currentCursorPos !== null) {
+                    let diff = newValueLength - oldValueLength;
+                    let newCursorPos = currentCursorPos + diff;
+                    // Si se eliminó un punto y el cursor estaba después, ajustar
+                    if (diff < 0 && value.charAt(currentCursorPos -1) === '.') {
+                         // No hacer nada especial, el navegador suele manejarlo bien
+                    } else if (diff > 0 && e.target.value.charAt(newCursorPos -1) === '.') {
+                         // No hacer nada especial
+                    }
+                     try {
+                        e.target.setSelectionRange(newCursorPos, newCursorPos);
+                     } catch (ex) { /* Puede fallar si el input no está enfocado, etc. */ }
+                }
+            });
+
+            inputElement.addEventListener('blur', function(e) {
+                let rawValue = e.target.value.replace(/[^\d]/g, '');
+                if (rawValue) {
+                    e.target.value = formatCurrencyCLP(parseInt(rawValue, 10));
+                } else {
+                    e.target.value = '';
+                }
+                const changeEvent = new Event('change', { bubbles: true, cancelable: true });
+                e.target.dispatchEvent(changeEvent);
+            });
+
+            inputElement.addEventListener('focus', function(e) {
+                let rawValue = e.target.value.replace(/[^\d]/g, '');
+                if (rawValue) {
+                    e.target.value = parseInt(rawValue, 10); 
+                } else {
+                    e.target.value = '';
+                }
+            });
+        }
+        
+        // --- Authentication ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+                if(userIdDisplay) userIdDisplay.textContent = `ID de Usuario: ${userId}`;
+                showMessage("Usuario autenticado.", "success");
+                loadFinancialData();
+            } else {
+                userId = null;
+                if(userIdDisplay) userIdDisplay.textContent = "Usuario no autenticado.";
+                showMessage("Autenticando...", "info");
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await setPersistence(auth, browserLocalPersistence);
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    console.error("Error de autenticación:", error);
+                    if(userIdDisplay) userIdDisplay.textContent = "Error de autenticación.";
+                    showMessage(`Error de autenticación: ${error.message}`, "error");
+                }
+            }
+        });
+
+        // --- General Income/Expense and Categories ---
+        function renderCategories() {
+            if (!categoriesListDisplay) return;
+            categoriesListDisplay.innerHTML = categories.length > 0 
+                ? categories.map(cat => `<span class="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm">${cat.name}</span>`).join(' ')
+                : `<span class="text-gray-400 text-sm italic">Aún no has añadido categorías.</span>`;
+            updateAllExpenseCategoryDropdowns();
+        }
+
+        function addCategory() {
+            if (!newCategoryInput) return;
+            const categoryName = newCategoryInput.value.trim();
+            if (categoryName && !categories.find(cat => cat.name.toLowerCase() === categoryName.toLowerCase())) {
+                categories.push({ id: crypto.randomUUID(), name: categoryName });
+                newCategoryInput.value = '';
+                renderCategories();
+                showMessage(`Categoría "${categoryName}" añadida.`, "success");
+            } else if (!categoryName) showMessage("Nombre de categoría vacío.", "warn");
+            else showMessage(`Categoría "${categoryName}" ya existe.`, "warn");
+        }
+
+        function updateExpenseCategoryDropdown(selectElement, selectedCategoryName = '') {
+            if (!selectElement) return;
+            const currentSelectedValue = selectElement.value;
+            selectElement.innerHTML = '<option value="">Sin Categoría</option>';
+            categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat.name;
+                option.textContent = cat.name;
+                if (cat.name === selectedCategoryName || cat.name === currentSelectedValue) {
+                    option.selected = true;
+                }
+                selectElement.appendChild(option);
+            });
+        }
+        
+        function updateAllExpenseCategoryDropdowns() {
+            document.querySelectorAll('.expense-category-select').forEach(select => {
+                 if (select.closest('.expense-item')) { 
+                    updateExpenseCategoryDropdown(select, select.dataset.selectedCategory || select.value);
+                }
+            });
+        }
+
+        function addGeneralExpenseItem(id = crypto.randomUUID(), name = '', amount = '', categoryName = '') {
+            if (!expensesList) return;
+            const listItem = document.createElement('div');
+            listItem.classList.add('flex', 'flex-col', 'sm:flex-row', 'gap-2', 'mb-3', 'p-3', 'border', 'border-gray-200', 'rounded-lg', 'expense-item');
+            listItem.dataset.id = id;
+
+            listItem.innerHTML = `
+                <input type="text" placeholder="Nombre del Gasto" value="${name}" class="expense-name flex-grow sm:w-2/5 p-2 border rounded-md" data-field="name">
+                <select class="expense-category-select sm:w-1/4 p-2 border rounded-md" data-field="category" data-selected-category="${categoryName}"></select>
+                <input type="text" inputmode="numeric" placeholder="Monto (Ej: 10000)" value="${amount ? formatCurrencyCLP(amount, false) : ''}" class="expense-amount sm:w-1/4 p-2 border rounded-md" data-field="amount">
+                <button type="button" class="remove-expense text-red-500 hover:text-red-700 p-2 bg-red-100 rounded-md sm:w-auto w-full">&times; Eliminar</button>
+            `;
+            expensesList.appendChild(listItem);
+            applyAmountFormattingListeners(listItem.querySelector('.expense-amount'));
+            updateExpenseCategoryDropdown(listItem.querySelector('.expense-category-select'), categoryName);
+
+            listItem.querySelector('.remove-expense').addEventListener('click', () => {
+                listItem.remove();
+                updateGeneralExpensesFromDOM();
+                calculateAndRenderAll();
+            });
+
+            listItem.querySelectorAll('input[type="text"].expense-name, select.expense-category-select, input.expense-amount').forEach(input => {
+                input.addEventListener('change', () => { 
+                    updateGeneralExpensesFromDOM();
+                    calculateAndRenderAll();
+                });
+            });
+        }
+        
+        function updateGeneralExpensesFromDOM() {
+            generalExpenses = [];
+            document.querySelectorAll('#expensesList .expense-item').forEach(item => {
+                const id = item.dataset.id;
+                const name = item.querySelector('.expense-name').value.trim();
+                const category = item.querySelector('.expense-category-select').value;
+                const amount = parseCurrencyCLP(item.querySelector('.expense-amount').value);
+                if (name && amount > 0) {
+                    generalExpenses.push({ id, name, amount, category });
+                }
+            });
+        }
+        
+        // --- Credit Card Management ---
+        function addCreditCard() {
+            if (!newCardNameInput) return;
+            const cardName = newCardNameInput.value.trim();
+            if (cardName && !creditCards.find(cc => cc.name.toLowerCase() === cardName.toLowerCase())) {
+                creditCards.push({ id: crypto.randomUUID(), name: cardName, expenses: [] });
+                newCardNameInput.value = '';
+                renderCreditCards();
+                updateCardForExpenseSelect();
+                showMessage(`Tarjeta "${cardName}" añadida.`, "success");
+            } else if (!cardName) showMessage("Nombre de tarjeta vacío.", "warn");
+            else showMessage(`Tarjeta "${cardName}" ya existe.`, "warn");
+        }
+
+        function renderCreditCards() {
+            if (!creditCardsListContainer) return;
+            creditCardsListContainer.innerHTML = '';
+            if (creditCards.length === 0) {
+                creditCardsListContainer.innerHTML = `<p class="text-gray-500 italic">Aún no has añadido tarjetas de crédito.</p>`;
+                return;
+            }
+
+            creditCards.forEach(card => {
+                const cardDiv = document.createElement('div');
+                cardDiv.classList.add('p-4', 'bg-white', 'rounded-lg', 'shadow', 'mb-4');
+                cardDiv.innerHTML = `
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="text-lg font-semibold text-blue-700">${card.name}</h4>
+                        <button class="remove-card-btn text-xs text-red-500 hover:text-red-700" data-card-id="${card.id}">&times; Eliminar Tarjeta</button>
+                    </div>
+                    <div id="expenses-for-${card.id}" class="space-y-2 text-sm"></div>
+                    <p class="text-right font-semibold mt-3 text-blue-600">Pago este mes: <span id="monthly-payment-${card.id}">${formatCurrencyCLP(0)}</span></p>
+                `;
+                creditCardsListContainer.appendChild(cardDiv);
+                renderCreditCardExpenses(card);
+
+                cardDiv.querySelector('.remove-card-btn').addEventListener('click', (e) => {
+                    const cardIdToRemove = e.target.dataset.cardId;
+                    creditCards = creditCards.filter(c => c.id !== cardIdToRemove);
+                    renderCreditCards();
+                    updateCardForExpenseSelect();
+                    calculateAndRenderAll();
+                    showMessage("Tarjeta eliminada.", "info");
+                });
+            });
+            calculateAndRenderAll(); 
+        }
+
+        function renderCreditCardExpenses(card) {
+            const container = document.getElementById(`expenses-for-${card.id}`);
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (card.expenses.length === 0) {
+                container.innerHTML = `<p class="text-gray-400 italic text-xs">Sin gastos registrados para esta tarjeta.</p>`;
+                return;
+            }
+            
+            const today = new Date();
+            const currentMonth = today.getMonth();
+            const currentYear = today.getFullYear();
+
+            card.expenses.forEach(exp => {
+                const expenseDiv = document.createElement('div');
+                expenseDiv.classList.add('p-2', 'border', 'rounded-md', 'bg-gray-50');
+                
+                let installmentsHtml = '<ul class="text-xs list-disc list-inside pl-2 mt-1">';
+                for (let i = 0; i < exp.installments; i++) {
+                    const paymentDate = new Date(exp.purchaseDate);
+                    paymentDate.setMonth(paymentDate.getMonth() + i);
+                     const isCurrentMonthInstallment = paymentDate.getMonth() === currentMonth && paymentDate.getFullYear() === currentYear;
+                    installmentsHtml += `<li class="${isCurrentMonthInstallment ? 'font-bold text-blue-600' : ''}">Cuota ${i+1}/${exp.installments}: ${formatCurrencyCLP(exp.installmentAmount)} (Pagar en: ${paymentDate.toLocaleString('es-CL', {month: 'short', year: 'numeric'})})</li>`;
+                }
+                installmentsHtml += '</ul>';
+
+                expenseDiv.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="font-medium">${exp.description} - ${formatCurrencyCLP(exp.totalAmount)} (${exp.installments} cuota${exp.installments > 1 ? 's' : ''})</p>
+                            <p class="text-xs text-gray-500">Fecha compra: ${new Date(exp.purchaseDate).toLocaleDateString('es-CL')}</p>
+                            ${exp.notes ? `<p class="text-xs text-gray-500 italic">Nota: ${exp.notes}</p>` : ''}
+                        </div>
+                        <button class="remove-credit-expense-btn text-xs text-red-400 hover:text-red-600" data-card-id="${card.id}" data-expense-id="${exp.id}">&times;</button>
+                    </div>
+                    ${installmentsHtml}
+                `;
+                container.appendChild(expenseDiv);
+
+                expenseDiv.querySelector('.remove-credit-expense-btn').addEventListener('click', (e) => {
+                    const cardId = e.target.dataset.cardId;
+                    const expenseIdToRemove = e.target.dataset.expenseId;
+                    const targetCard = creditCards.find(c => c.id === cardId);
+                    if (targetCard) {
+                        targetCard.expenses = targetCard.expenses.filter(ex => ex.id !== expenseIdToRemove);
+                        renderCreditCards(); 
+                        showMessage("Gasto de tarjeta eliminado.", "info");
+                    }
+                });
+            });
+        }
+
+        function handleAddCreditExpense(event) {
+            event.preventDefault();
+            if (!cardForExpenseSelect || !creditExpenseDescription || !creditExpenseAmount || !creditExpenseInstallments || !creditExpensePurchaseDate || !creditExpenseNotes) return;
+
+            const cardId = cardForExpenseSelect.value;
+            const description = creditExpenseDescription.value.trim();
+            const totalAmount = parseCurrencyCLP(creditExpenseAmount.value);
+            const installments = parseInt(creditExpenseInstallments.value) || 1;
+            const purchaseDate = creditExpensePurchaseDate.value; 
+            const notes = creditExpenseNotes.value.trim();
+
+            if (!cardId || !description || totalAmount <= 0 || !purchaseDate) {
+                showMessage("Por favor, completa todos los campos obligatorios del gasto de tarjeta.", "warn");
+                return;
+            }
+
+            const targetCard = creditCards.find(cc => cc.id === cardId);
+            if (targetCard) {
+                targetCard.expenses.push({
+                    id: crypto.randomUUID(),
+                    description, totalAmount, installments, purchaseDate, notes,
+                    installmentAmount: totalAmount / installments
+                });
+                renderCreditCards();
+                showMessage("Gasto de tarjeta añadido.", "success");
+                if (addCreditExpenseModal) closeModal(addCreditExpenseModal);
+                if (creditExpenseForm) creditExpenseForm.reset();
+                 if(creditExpensePurchaseDate) creditExpensePurchaseDate.valueAsDate = new Date(); 
+            } else {
+                showMessage("Tarjeta no encontrada.", "error");
+            }
+        }
+        
+        function updateCardForExpenseSelect() {
+            if (!cardForExpenseSelect) return;
+            cardForExpenseSelect.innerHTML = '<option value="">Selecciona una tarjeta</option>';
+            creditCards.forEach(card => {
+                const option = document.createElement('option');
+                option.value = card.id;
+                option.textContent = card.name;
+                cardForExpenseSelect.appendChild(option);
+            });
+        }
+
+        function calculateMonthlyCardPayments() {
+            const today = new Date();
+            const currentMonth = today.getMonth();
+            const currentYear = today.getFullYear();
+
+            creditCards.forEach(card => {
+                let monthlyPayment = 0;
+                card.expenses.forEach(exp => {
+                    for (let i = 0; i < exp.installments; i++) {
+                        const paymentDate = new Date(exp.purchaseDate);
+                        paymentDate.setMonth(paymentDate.getMonth() + i);
+                        if (paymentDate.getMonth() === currentMonth && paymentDate.getFullYear() === currentYear) {
+                            monthlyPayment += exp.installmentAmount;
+                        }
+                    }
+                });
+                const paymentDisplay = document.getElementById(`monthly-payment-${card.id}`);
+                if (paymentDisplay) paymentDisplay.textContent = formatCurrencyCLP(monthlyPayment);
+            });
+        }
+
+
+        // --- Calculations and Rendering ---
+        function calculateAndRenderAll() {
+            if (!incomeInput || !totalFundInput || !totalIncomeDisplay || !totalExpensesDisplay || !balanceDisplay || !fundSummaryTotal || !fundSummarySpent || !fundSummaryRemaining) {
+                console.warn("calculateAndRenderAll: DOM elements not ready yet for full calculation.");
+                return;
+            }
+            
+            income = parseCurrencyCLP(incomeInput.value);
+            totalFund = parseCurrencyCLP(totalFundInput.value);
+            
+            let totalGeneralExpensesValue = 0;
+            generalExpenses.forEach(exp => {
+                totalGeneralExpensesValue += exp.amount;
+            });
+
+            totalIncomeDisplay.textContent = formatCurrencyCLP(income);
+            totalExpensesDisplay.textContent = formatCurrencyCLP(totalGeneralExpensesValue);
+            balanceDisplay.textContent = formatCurrencyCLP(income - totalGeneralExpensesValue);
+            balanceDisplay.classList.toggle('text-red-600', (income - totalGeneralExpensesValue) < 0);
+            balanceDisplay.classList.toggle('text-green-600', (income - totalGeneralExpensesValue) >= 0);
+
+            fundSummaryTotal.textContent = formatCurrencyCLP(totalFund);
+            fundSummarySpent.textContent = formatCurrencyCLP(totalGeneralExpensesValue); 
+            const fundRemaining = totalFund - totalGeneralExpensesValue;
+            fundSummaryRemaining.textContent = formatCurrencyCLP(fundRemaining);
+            fundSummaryRemaining.classList.toggle('text-red-600', fundRemaining < 0);
+            fundSummaryRemaining.classList.toggle('text-green-600', fundRemaining >= 0);
+
+            renderFundUsageChart(totalGeneralExpensesValue, fundRemaining > 0 ? fundRemaining : 0);
+            calculateMonthlyCardPayments();
+        }
+
+        function renderFundUsageChart(spent, remaining) {
+            if (fundChartInstance) {
+                fundChartInstance.destroy();
+            }
+            if (!fundUsageChartCanvas) return;
+            const ctx = fundUsageChartCanvas.getContext('2d');
+            if (!ctx) {
+                console.warn("renderFundUsageChart: Canvas context not available.");
+                return; 
+            }
+            fundChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Gastado del Fondo', 'Disponible del Fondo'],
+                    datasets: [{
+                        label: 'Uso del Fondo Total',
+                        data: [spent, remaining < 0 ? 0 : remaining], 
+                        backgroundColor: ['rgb(239, 68, 68)', 'rgb(34, 197, 94)'],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${formatCurrencyCLP(context.raw)}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- Data Persistence (Firebase) ---
+        async function saveFinancialData() {
+            if (!userId || !db) {
+                showMessage(!userId ? "Debes estar autenticado." : "Base de datos no lista.", "error"); return;
+            }
+            if (!incomeInput || !totalFundInput) {
+                 showMessage("Elementos de la interfaz no están listos para guardar.", "error"); return;
+            }
+            updateGeneralExpensesFromDOM(); 
+
+            const dataToSave = {
+                income: parseCurrencyCLP(incomeInput.value),
+                totalFund: parseCurrencyCLP(totalFundInput.value),
+                categories: categories,
+                generalExpenses: generalExpenses,
+                creditCards: creditCards,
+                lastUpdated: new Date().toISOString()
+            };
+
+            const docRef = doc(db, "artifacts", appId, "users", userId, "financialData", "main");
+            try {
+                await setDoc(docRef, dataToSave);
+                showMessage("Datos guardados exitosamente.", "success");
+            } catch (error) {
+                console.error("Error al guardar:", error);
+                showMessage(`Error al guardar: ${error.message}`, "error");
+            }
+        }
+
+        function loadFinancialData() {
+            if (!userId || !db) return;
+            if (financialDataUnsubscribe) financialDataUnsubscribe();
+
+            const docRef = doc(db, "artifacts", appId, "users", userId, "financialData", "main");
+            financialDataUnsubscribe = onSnapshot(docRef, (docSnap) => {
+                if (!incomeInput || !totalFundInput || !expensesList) { 
+                    console.warn("loadFinancialData: DOM not fully ready for update from Firestore.");
+                    return; 
+                }
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    console.log("Datos cargados:", data);
+
+                    incomeInput.value = formatCurrencyCLP(data.income || 0, false); // Set initial value for formatting
+                    totalFundInput.value = formatCurrencyCLP(data.totalFund || 0, false); // Set initial value for formatting
+                    
+                    // Trigger blur to format correctly with symbol if needed, or just re-evaluate
+                    if (incomeInput.onblur) incomeInput.onblur({target: incomeInput}); 
+                    if (totalFundInput.onblur) totalFundInput.onblur({target: totalFundInput}); 
+
+
+                    categories = data.categories || [{ id: crypto.randomUUID(), name: "General" }];
+                    generalExpenses = data.generalExpenses || [];
+                    creditCards = data.creditCards || [];
+                    
+                    renderCategories();
+                    
+                    expensesList.innerHTML = '';
+                    if (generalExpenses.length > 0) {
+                        generalExpenses.forEach(exp => addGeneralExpenseItem(exp.id, exp.name, exp.amount, exp.category));
+                    } else {
+                        addGeneralExpenseItem(); 
+                    }
+                    
+                    renderCreditCards();
+                    updateCardForExpenseSelect();
+                    calculateAndRenderAll();
+                    showMessage("Datos cargados.", "success");
+
+                } else {
+                    showMessage("No hay datos guardados. ¡Empieza a añadir!", "info");
+                    categories = [{id: crypto.randomUUID(), name: "General"}];
+                    generalExpenses = [];
+                    creditCards = [];
+                    incomeInput.value = ''; // Start empty
+                    totalFundInput.value = ''; // Start empty
+                    if (incomeInput.onblur) incomeInput.onblur({target: incomeInput});
+                    if (totalFundInput.onblur) totalFundInput.onblur({target: totalFundInput});
+
+                    renderCategories();
+                    expensesList.innerHTML = '';
+                    addGeneralExpenseItem();
+                    renderCreditCards();
+                    updateCardForExpenseSelect();
+                    calculateAndRenderAll();
+                }
+            }, (error) => {
+                console.error("Error al cargar:", error);
+                showMessage(`Error al cargar: ${error.message}`, "error");
+            });
+        }
+        
+        // --- Messaging and Modals ---
+        function showMessage(message, type = "info") {
+            if (!messageArea) return;
+            messageArea.textContent = message;
+            messageArea.className = 'p-3 rounded-md text-sm mb-4 transition-opacity duration-300 opacity-100';
+            const colors = { success: 'bg-green-100 text-green-700', error: 'bg-red-100 text-red-700', warn: 'bg-yellow-100 text-yellow-700', info: 'bg-blue-100 text-blue-700' };
+            messageArea.classList.add(...(colors[type] || colors.info).split(' '));
+            setTimeout(() => {
+                if(messageArea) {
+                    messageArea.classList.remove('opacity-100'); messageArea.classList.add('opacity-0');
+                    setTimeout(() => { if(messageArea && messageArea.textContent === message) { messageArea.textContent = ''; messageArea.className = 'p-3 rounded-md text-sm mb-4'; }}, 300);
+                }
+            }, 5000);
+        }
+
+        function openModal(modalElement) { if(modalElement) modalElement.classList.remove('hidden'); }
+        function closeModal(modalElement) { if(modalElement) modalElement.classList.add('hidden'); }
+
+        // --- CSV Export ---
+        function exportToCSV() {
+            if (!totalFundInput || !incomeInput || !totalIncomeDisplay || !totalExpensesDisplay || !balanceDisplay || !fundSummaryRemaining) {
+                 showMessage("Datos no listos para exportar.", "warn"); return;
+            }
+            let csvContent = "data:text/csv;charset=utf-8,";
+            const escapeCSV = (text) => `"${String(text || '').replace(/"/g, '""')}"`; 
+
+            csvContent += "Sección,Subsección/Tarjeta,Categoría/Descripción,Cuotas,Fecha Compra,Monto CLP\r\n";
+            csvContent += `Fondo Total,,,,-,${escapeCSV(formatCurrencyCLP(parseCurrencyCLP(totalFundInput.value)))}\r\n`;
+            csvContent += `Ingreso Mensual General,,,,-,${escapeCSV(formatCurrencyCLP(parseCurrencyCLP(incomeInput.value)))}\r\n`;
+            
+            generalExpenses.forEach(exp => {
+                csvContent += `Gasto General,,${escapeCSV(exp.category)},${escapeCSV(exp.name)},-,${escapeCSV(formatCurrencyCLP(exp.amount))}\r\n`;
+            });
+
+            creditCards.forEach(card => {
+                csvContent += `Tarjeta de Crédito,${escapeCSV(card.name)},,,, \r\n`; 
+                card.expenses.forEach(exp => {
+                    csvContent += `Gasto Tarjeta,${escapeCSV(card.name)},${escapeCSV(exp.description)},${exp.installments} de ${formatCurrencyCLP(exp.installmentAmount)},${escapeCSV(new Date(exp.purchaseDate).toLocaleDateString('es-CL'))},${escapeCSV(formatCurrencyCLP(exp.totalAmount))}\r\n`;
+                });
+                let monthlyPaymentForCard = 0;
+                const today = new Date();
+                const currentMonth = today.getMonth();
+                const currentYear = today.getFullYear();
+                card.expenses.forEach(exp => {
+                    for (let i = 0; i < exp.installments; i++) {
+                        const paymentDate = new Date(exp.purchaseDate);
+                        paymentDate.setMonth(paymentDate.getMonth() + i);
+                        if (paymentDate.getMonth() === currentMonth && paymentDate.getFullYear() === currentYear) {
+                            monthlyPaymentForCard += exp.installmentAmount;
+                        }
+                    }
+                });
+                csvContent += `Pago Estimado Mes Actual,${escapeCSV(card.name)},Total a Pagar este Mes,,,${escapeCSV(formatCurrencyCLP(monthlyPaymentForCard))}\r\n`;
+            });
+            
+            csvContent += "\r\nResumen General,,,,\r\n";
+            csvContent += `Total Ingreso General,,,,${escapeCSV(totalIncomeDisplay.textContent)}\r\n`;
+            csvContent += `Total Gastos Generales,,,,${escapeCSV(totalExpensesDisplay.textContent)}\r\n`;
+            csvContent += `Balance (Ingreso - Gasto General),,,,${escapeCSV(balanceDisplay.textContent)}\r\n`;
+            csvContent += `Saldo Restante del Fondo Total,,,,${escapeCSV(fundSummaryRemaining.textContent)}\r\n`;
+
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `control_gastos_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            showMessage("Datos exportados a CSV.", "success");
+        }
+
+        // --- Event Listeners Initial Setup ---
+        function setupEventListeners() {
+            let allCriticalElementsFound = true;
+            const criticalElementMappings = {
+                incomeInput: 'income', 
+                totalFundInput: 'totalFundInput', 
+                addCategoryButton: 'addCategoryButton', 
+                newCategoryInput: 'newCategoryInput', 
+                addExpenseButton: 'addExpense', 
+                saveButton: 'saveData', 
+                exportButton: 'exportToCsv', 
+                addCardButton: 'addCardButton', 
+                newCardNameInput: 'newCardNameInput', 
+                openAddCreditExpenseModalButton: 'openAddCreditExpenseModalButton', 
+                closeCreditExpenseModalButton: 'closeCreditExpenseModalButton', 
+                creditExpenseForm: 'creditExpenseForm', 
+                creditExpensePurchaseDate: 'creditExpensePurchaseDate',
+                saveTotalFundButton: 'saveTotalFundButton',
+                saveIncomeButton: 'saveIncomeButton',
+                creditExpenseAmount: 'creditExpenseAmount'
+            };
+
+            const elementsToAttachListenersTo = {
+                incomeInput, totalFundInput, addCategoryButton, newCategoryInput, 
+                addExpenseButton, saveButton, exportButton, addCardButton, 
+                newCardNameInput, openAddCreditExpenseModalButton, 
+                closeCreditExpenseModalButton, creditExpenseForm, creditExpensePurchaseDate,
+                saveTotalFundButton, saveIncomeButton, creditExpenseAmount
+            };
+
+            for (const varName in criticalElementMappings) {
+                if (!elementsToAttachListenersTo[varName]) { 
+                    console.error(`setupEventListeners: Elemento crítico '${varName}' (esperado con ID: '${criticalElementMappings[varName]}') no fue encontrado.`);
+                    allCriticalElementsFound = false;
+                }
+            }
+
+            if (!allCriticalElementsFound) {
+                console.error("setupEventListeners: Uno o más elementos del DOM críticos no fueron encontrados (detalles arriba). Algunos listeners no se adjuntarán o la app podría no funcionar correctamente.");
+            }
+
+            applyAmountFormattingListeners(incomeInput);
+            applyAmountFormattingListeners(totalFundInput);
+            applyAmountFormattingListeners(creditExpenseAmount); // Aplicar también al monto del gasto de tarjeta
+
+            if(addCategoryButton) addCategoryButton.addEventListener('click', addCategory);
+            if(newCategoryInput) newCategoryInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addCategory(); });
+            if(addExpenseButton) addExpenseButton.addEventListener('click', () => {
+                addGeneralExpenseItem();
+                updateGeneralExpensesFromDOM(); 
+                calculateAndRenderAll();
+            });
+            
+            if(saveButton) saveButton.addEventListener('click', saveFinancialData);
+            if(exportButton) exportButton.addEventListener('click', exportToCSV);
+
+            if(addCardButton) addCardButton.addEventListener('click', addCreditCard);
+            if(newCardNameInput) newCardNameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addCreditCard(); });
+            
+            if(openAddCreditExpenseModalButton) openAddCreditExpenseModalButton.addEventListener('click', () => openModal(addCreditExpenseModal));
+            if(closeCreditExpenseModalButton) closeCreditExpenseModalButton.addEventListener('click', () => closeModal(addCreditExpenseModal)); 
+            if(creditExpenseForm) creditExpenseForm.addEventListener('submit', handleAddCreditExpense);
+            
+            if(creditExpensePurchaseDate) creditExpensePurchaseDate.valueAsDate = new Date();
+
+            if (saveTotalFundButton) {
+                saveTotalFundButton.addEventListener('click', () => {
+                    showMessage("Guardando fondo total...", "info");
+                    saveFinancialData(); 
+                });
+            }
+            if (saveIncomeButton) {
+                saveIncomeButton.addEventListener('click', () => {
+                    showMessage("Guardando ingreso mensual...", "info");
+                    saveFinancialData(); 
+                });
+            }
+        }
+        
+        // Initialize after DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Assign DOM elements
+            incomeInput = document.getElementById('income');
+            totalFundInput = document.getElementById('totalFundInput');
+            expensesList = document.getElementById('expensesList');
+            addExpenseButton = document.getElementById('addExpense');
+            totalIncomeDisplay = document.getElementById('totalIncome');
+            totalExpensesDisplay = document.getElementById('totalGeneralExpenses');
+            balanceDisplay = document.getElementById('balance');
+            saveButton = document.getElementById('saveData');
+            userIdDisplay = document.getElementById('userIdDisplay');
+            messageArea = document.getElementById('messageArea');
+            
+            newCategoryInput = document.getElementById('newCategoryInput');
+            addCategoryButton = document.getElementById('addCategoryButton');
+            categoriesListDisplay = document.getElementById('categoriesListDisplay');
+            
+            exportButton = document.getElementById('exportToCsv');
+
+            fundUsageChartCanvas = document.getElementById('fundUsageChart');
+            fundSummaryTotal = document.getElementById('fundSummaryTotal');
+            fundSummarySpent = document.getElementById('fundSummarySpent');
+            fundSummaryRemaining = document.getElementById('fundSummaryRemaining');
+
+            newCardNameInput = document.getElementById('newCardNameInput');
+            addCardButton = document.getElementById('addCardButton');
+            creditCardsListContainer = document.getElementById('creditCardsListContainer');
+            addCreditExpenseModal = document.getElementById('addCreditExpenseModal');
+            closeCreditExpenseModalButton = document.getElementById('closeCreditExpenseModalButton'); 
+            creditExpenseForm = document.getElementById('creditExpenseForm');
+            cardForExpenseSelect = document.getElementById('cardForExpenseSelect');
+            creditExpenseDescription = document.getElementById('creditExpenseDescription');
+            creditExpenseAmount = document.getElementById('creditExpenseAmount');
+            creditExpenseInstallments = document.getElementById('creditExpenseInstallments');
+            creditExpensePurchaseDate = document.getElementById('creditExpensePurchaseDate');
+            creditExpenseNotes = document.getElementById('creditExpenseNotes');
+            openAddCreditExpenseModalButton = document.getElementById('openAddCreditExpenseModalButton');
+
+            saveTotalFundButton = document.getElementById('saveTotalFundButton');
+            saveIncomeButton = document.getElementById('saveIncomeButton');
+            
+            setupEventListeners();
+            calculateAndRenderAll(); 
+        });
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .container { max-width: 1000px; }
+        .scrollable-list { max-height: 300px; overflow-y: auto; }
+        #fundUsageChartContainer { position: relative; height:250px; width:100%; max-width:300px; margin: auto; }
+        .modal { background-color: rgba(0,0,0,0.5); }
+        .modal-content { max-height: 90vh; overflow-y: auto; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col items-center p-4 sm:p-6">
+
+    <div class="container mx-auto bg-white p-6 sm:p-8 rounded-xl shadow-2xl w-full">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl sm:text-4xl font-bold text-indigo-700">Control de Gastos Pro</h1>
+            <p id="userIdDisplay" class="text-xs text-gray-500 mt-1">Cargando...</p>
+        </header>
+
+        <div id="messageArea" class="p-3 rounded-md text-sm mb-4" role="alert"></div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="md:col-span-1 space-y-6">
+                <section class="p-4 bg-purple-50 rounded-lg shadow">
+                    <h2 class="text-xl font-semibold text-purple-600 mb-3">Fondo Total Disponible</h2>
+                    <div class="flex items-center gap-2">
+                        <input type="text" inputmode="text" id="totalFundInput" placeholder="Ej: 1.000.000" class="w-full p-3 border border-gray-300 rounded-md shadow-sm text-lg">
+                        <button id="saveTotalFundButton" title="Guardar Fondo Total" class="p-2 bg-purple-200 text-purple-700 rounded-md hover:bg-purple-300 text-xs">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7.5 2.5a.5.5 0 00-1 0V5.28A2.5 2.5 0 004.22 7.5H2.5a.5.5 0 000 1h1.72a2.5 2.5 0 002.28 2.22V13a.5.5 0 001 0v-2.28A2.5 2.5 0 009.78 8.5h1.72a.5.5 0 000-1H9.78A2.5 2.5 0 007.5 5.28V2.5zM12.5 11.5a.5.5 0 00-1 0V13H9.22A2.5 2.5 0 007 15.28V17.5a.5.5 0 001 0v-2.22A2.5 2.5 0 0010.28 13H12v-1.5zM14 7.5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="p-4 bg-indigo-50 rounded-lg shadow">
+                    <h2 class="text-xl font-semibold text-indigo-600 mb-3">Ingreso Mensual General</h2>
+                     <div class="flex items-center gap-2">
+                        <input type="text" inputmode="text" id="income" placeholder="Ej: 500.000" class="w-full p-3 border border-gray-300 rounded-md shadow-sm text-lg">
+                        <button id="saveIncomeButton" title="Guardar Ingreso Mensual" class="p-2 bg-indigo-200 text-indigo-700 rounded-md hover:bg-indigo-300 text-xs">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7.5 2.5a.5.5 0 00-1 0V5.28A2.5 2.5 0 004.22 7.5H2.5a.5.5 0 000 1h1.72a2.5 2.5 0 002.28 2.22V13a.5.5 0 001 0v-2.28A2.5 2.5 0 009.78 8.5h1.72a.5.5 0 000-1H9.78A2.5 2.5 0 007.5 5.28V2.5zM12.5 11.5a.5.5 0 00-1 0V13H9.22A2.5 2.5 0 007 15.28V17.5a.5.5 0 001 0v-2.22A2.5 2.5 0 0010.28 13H12v-1.5zM14 7.5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                        </button>
+                    </div>
+                </section>
+                
+                <section class="p-4 bg-gray-50 rounded-lg shadow">
+                    <h2 class="text-xl font-semibold text-gray-700 mb-3 text-center">Uso del Fondo Total</h2>
+                    <div id="fundUsageChartContainer">
+                        <canvas id="fundUsageChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-sm space-y-1">
+                        <p class="flex justify-between"><span>Fondo Total:</span> <strong id="fundSummaryTotal">$0</strong></p>
+                        <p class="flex justify-between"><span>Gastado:</span> <strong id="fundSummarySpent" class="text-red-600">$0</strong></p>
+                        <p class="flex justify-between"><span>Restante:</span> <strong id="fundSummaryRemaining" class="text-green-600">$0</strong></p>
+                    </div>
+                </section>
+            </div>
+
+            <div class="md:col-span-2 space-y-6">
+                <section class="p-4 bg-sky-50 rounded-lg shadow">
+                    <h2 class="text-xl font-semibold text-sky-600 mb-3">Categorías de Gastos</h2>
+                    <div class="flex flex-col sm:flex-row items-center gap-3 mb-3">
+                        <input type="text" id="newCategoryInput" placeholder="Nueva categoría" class="flex-grow p-2 border rounded-md">
+                        <button id="addCategoryButton" class="bg-sky-500 hover:bg-sky-600 text-white font-semibold py-2 px-4 rounded-md w-full sm:w-auto">
+                            + Añadir Categoría
+                        </button>
+                    </div>
+                    <div id="categoriesListDisplay" class="flex flex-wrap gap-2 p-2 bg-white rounded-md border min-h-[40px]"></div>
+                </section>
+
+                <section class="p-4 bg-rose-50 rounded-lg shadow">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold text-rose-600">Gastos Generales (Efectivo/Débito)</h2>
+                        <button id="addExpense" class="bg-rose-500 hover:bg-rose-600 text-white font-semibold py-2 px-4 rounded-md text-sm">
+                            + Añadir Gasto General
+                        </button>
+                    </div>
+                    <div id="expensesList" class="space-y-2 scrollable-list pr-2">
+                        </div>
+                </section>
+                
+                <section class="p-4 bg-green-50 rounded-lg shadow">
+                    <h2 class="text-xl font-semibold text-green-700 mb-3">Resumen (Ingreso General vs Gastos Generales)</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center text-sm">
+                        <div class="p-3 bg-indigo-100 rounded-md"><p>Ingreso General</p><strong id="totalIncome" class="text-lg">$0</strong></div>
+                        <div class="p-3 bg-rose-100 rounded-md"><p>Total Gastos Generales</p><strong id="totalGeneralExpenses" class="text-lg">$0</strong></div>
+                        <div class="p-3 bg-green-100 rounded-md"><p>Balance</p><strong id="balance" class="text-lg">$0</strong></div>
+                    </div>
+                </section>
+            </div>
+        </div>
+        
+        <section class="mt-8 p-6 bg-blue-50 rounded-lg shadow">
+            <h2 class="text-2xl font-semibold text-blue-700 mb-6 text-center">Gestión de Tarjetas de Crédito</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="md:col-span-1 space-y-4">
+                    <h3 class="text-lg font-semibold text-blue-600">Añadir Tarjeta</h3>
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="newCardNameInput" placeholder="Nombre de la Tarjeta (Ej: Visa Banco X)" class="flex-grow p-2 border rounded-md">
+                        <button id="addCardButton" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold p-2 rounded-md">Añadir</button>
+                    </div>
+                     <button id="openAddCreditExpenseModalButton" class="w-full mt-4 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md">
+                        + Registrar Gasto en Tarjeta
+                    </button>
+                </div>
+                <div id="creditCardsListContainer" class="md:col-span-2 space-y-4 scrollable-list pr-2">
+                    <p class="text-gray-500 italic">Aún no has añadido tarjetas de crédito.</p>
+                </div>
+            </div>
+        </section>
+
+        <div id="addCreditExpenseModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center hidden z-50">
+            <div class="relative mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white modal-content">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold text-gray-900">Añadir Gasto en Tarjeta de Crédito</h3>
+                    <button id="closeCreditExpenseModalButton" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                    </button>
+                </div>
+                <form id="creditExpenseForm" class="space-y-4">
+                    <div>
+                        <label for="cardForExpenseSelect" class="block mb-1 text-sm font-medium text-gray-700">Tarjeta de Crédito*</label>
+                        <select id="cardForExpenseSelect" required class="w-full p-2 border border-gray-300 rounded-md shadow-sm"></select>
+                    </div>
+                    <div>
+                        <label for="creditExpenseDescription" class="block mb-1 text-sm font-medium text-gray-700">Descripción del Gasto*</label>
+                        <input type="text" id="creditExpenseDescription" required class="w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                    </div>
+                    <div>
+                        <label for="creditExpenseAmount" class="block mb-1 text-sm font-medium text-gray-700">Monto Total (CLP)*</label>
+                        <input type="text" inputmode="text" id="creditExpenseAmount" required placeholder="Ej: 50.000" class="w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                    </div>
+                    <div>
+                        <label for="creditExpenseInstallments" class="block mb-1 text-sm font-medium text-gray-700">Número de Cuotas* (1 para pago único)</label>
+                        <input type="number" id="creditExpenseInstallments" value="1" min="1" required class="w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                    </div>
+                    <div>
+                        <label for="creditExpensePurchaseDate" class="block mb-1 text-sm font-medium text-gray-700">Fecha de Compra*</label>
+                        <input type="date" id="creditExpensePurchaseDate" required class="w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                    </div>
+                    <div>
+                        <label for="creditExpenseNotes" class="block mb-1 text-sm font-medium text-gray-700">Notas (Opcional)</label>
+                        <textarea id="creditExpenseNotes" rows="2" class="w-full p-2 border border-gray-300 rounded-md shadow-sm"></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md">Guardar Gasto de Tarjeta</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="text-center mt-10 flex flex-col sm:flex-row justify-center gap-4">
+            <button id="saveData" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg">Guardar Todos los Datos</button>
+            <button id="exportToCsv" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg">Exportar a CSV</button>
+        </div>
+        
+        <footer class="mt-12 text-center text-xs text-gray-500">
+            <p>Control de Gastos Pro v1.2.5</p> 
+        </footer>
+    </div>
+</body>
+</html>
