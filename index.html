@@ -8,27 +8,51 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script type="module">
-       // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+      // Firebase Imports - ¡USA ESTAS LÍNEAS EXACTAMENTE!
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { 
+    getAuth, 
+    signInAnonymously, 
+    signInWithCustomToken, 
+    onAuthStateChanged,
+    setPersistence,
+    browserLocalPersistence 
+} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { 
+    getFirestore, 
+    doc, 
+    setDoc, 
+    getDoc, 
+    onSnapshot,
+    setLogLevel 
+} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 // Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// !! ASEGÚRATE DE QUE ESTOS VALORES SEAN EXACTAMENTE LOS DE TU PROYECTO !!
+// Estos son los que me proporcionaste (verifica que no haya errores de tipeo al copiarlos aquí):
 const firebaseConfig = {
   apiKey: "AIzaSyB0uI9mJ6TnY8JaSiO_B0YHS4-MxTdZ8_A",
   authDomain: "control-de-gastos-8b15c.firebaseapp.com",
   projectId: "control-de-gastos-8b15c",
-  storageBucket: "control-de-gastos-8b15c.firebasestorage.app",
+  storageBucket: "control-de-gastos-8b15c.firebasestorage.app", // Corregido ".firebasestorage.app" si era ".appspot.com"
   messagingSenderId: "974277292490",
   appId: "1:974277292490:web:3dc92c5ae0611b3969df33",
-  measurementId: "G-YKGDRHGGQQ"
+  measurementId: "G-YKGDRHGGQQ" // Este es opcional para nuestra app actual, pero no hace daño tenerlo
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+const auth = getAuth(app);
+const db = getFirestore(app);
+setLogLevel('debug'); // Mantenemos esto para ver logs detallados de Firestore en la consola del navegador
+
+// El ID de la aplicación para la ruta de Firestore (esto es diferente del appId en firebaseConfig)
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-gastos-pro-app';
+
+// --- Aquí comienza el resto de tu código JavaScript ---
+// let userId = null;
+// let financialDataUnsubscribe = null;
+// ...etc.
         
         // Global state for financial data
         let categories = [{ id: crypto.randomUUID(), name: "General" }];
