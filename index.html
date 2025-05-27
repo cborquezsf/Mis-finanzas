@@ -29,15 +29,18 @@
             setLogLevel 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Your web app's Firebase configuration
+        // MODO DE PRUEBA: Cambia a 'true' para saltar la autenticación durante las pruebas.
+        const TESTING_MODE = false; 
+
+        // Your web app's Firebase configuration (valores proporcionados por el usuario)
         const firebaseConfig = {
-          apiKey: "AIzaSyB0uI9mJ6TnY8JaSiO_B0YHS4-MxTdZ8_A", // USA TUS VALORES REALES AQUÍ
-          authDomain: "control-de-gastos-8b15c.firebaseapp.com", // USA TUS VALORES REALES AQUÍ
-          projectId: "control-de-gastos-8b15c", // USA TUS VALORES REALES AQUÍ
-          storageBucket: "control-de-gastos-8b15c.firebasestorage.app", // USA TUS VALORES REALES AQUÍ
-          messagingSenderId: "974277292490", // USA TUS VALORES REALES AQUÍ
-          appId: "1:974277292490:web:3dc92c5ae0611b3969df33", // USA TUS VALORES REALES AQUÍ
-          measurementId: "G-YKGDRHGGQQ" // USA TUS VALORES REALES AQUÍ (Opcional)
+          apiKey: "AIzaSyB0uI9mJ6TnY8JaSiO_B0YHS4-MxTdZ8_A",
+          authDomain: "control-de-gastos-8b15c.firebaseapp.com",
+          projectId: "control-de-gastos-8b15c",
+          storageBucket: "control-de-gastos-8b15c.firebasestorage.app",
+          messagingSenderId: "974277292490",
+          appId: "1:974277292490:web:3dc92c5ae0611b3969df33",
+          measurementId: "G-YKGDRHGGQQ"
         };
         
         const app = initializeApp(firebaseConfig);
@@ -49,6 +52,7 @@
         let userId = null;
         let userEmail = null;
         let financialDataUnsubscribe = null;
+        let authStateKnown = false; 
         
         let categories = [{ id: crypto.randomUUID(), name: "General" }];
         let generalExpenses = [];
@@ -86,7 +90,7 @@
         function mapAuthError(errorCode) { switch (errorCode) { case 'auth/email-already-in-use': return 'El correo electrónico ya está en uso.'; case 'auth/invalid-email': return 'El formato del correo electrónico no es válido.'; case 'auth/operation-not-allowed': return 'El inicio de sesión con correo y contraseña no está habilitado.'; case 'auth/weak-password': return 'La contraseña es demasiado débil.'; case 'auth/user-disabled': return 'Este usuario ha sido deshabilitado.'; case 'auth/user-not-found': return 'No se encontró un usuario con este correo.'; case 'auth/wrong-password': return 'Contraseña incorrecta.'; case 'auth/invalid-credential': return 'Credenciales inválidas.'; default: return errorCode; }}
 
         onAuthStateChanged(auth, (user) => {
-            if (user) { // Usuario está autenticado
+            if (user) { 
                 userId = user.uid;
                 userEmail = user.email;
                 console.log("Usuario autenticado:", userId, userEmail);
@@ -96,37 +100,39 @@
                 
                 showAppUI();
                 loadFinancialData();
-            } else { // No hay usuario autenticado o cerró sesión
-                userId = null;
-                userEmail = null;
-                console.log("No hay usuario autenticado.");
-                
-                if (financialDataUnsubscribe) financialDataUnsubscribe(); 
-                
-                // Resetear estado de la aplicación
-                generalExpenses = []; 
-                creditCards = [];
-                categories = [{ id: crypto.randomUUID(), name: "General" }];
-                mainIncome = { amount: 0, date: new Date().toISOString().split('T')[0] };
-                
-                showAuthUI(); // Mostrar UI de autenticación
-                
-                // Limpiar campos de la UI de la aplicación si estaba visible
-                if (appContainer && document.readyState === "complete") { 
-                    if (mainIncomeInput) mainIncomeInput.value = '';
-                    if (mainIncomeDateInput) mainIncomeDateInput.value = new Date().toISOString().split('T')[0];
-                    if (expensesList) expensesList.innerHTML = '';
-                    if (categoriesListDisplay) renderCategories(); 
-                    if (creditCardsListContainer) renderCreditCards(); 
-                    if(totalGeneralExpensesDisplay) totalGeneralExpensesDisplay.textContent = formatCurrencyCLP(0);
-                    if(balanceDisplay) balanceDisplay.textContent = formatCurrencyCLP(0);
-                    renderCreditCardPaymentVisuals();
-                    renderIncomeSummary();
+            } else { 
+                console.log("No hay usuario autenticado. Auth state known:", authStateKnown);
+                if (authStateKnown) { 
+                    userId = null;
+                    userEmail = null;
+                    if (financialDataUnsubscribe) {
+                        financialDataUnsubscribe();
+                        financialDataUnsubscribe = null; 
+                    }
+                    
+                    generalExpenses = []; 
+                    creditCards = [];
+                    categories = [{ id: crypto.randomUUID(), name: "General" }];
+                    mainIncome = { amount: 0, date: new Date().toISOString().split('T')[0] };
+                    
+                    if (appContainer && document.readyState === "complete") { 
+                        if (mainIncomeInput) mainIncomeInput.value = '';
+                        if (mainIncomeDateInput) mainIncomeDateInput.value = new Date().toISOString().split('T')[0];
+                        if (expensesList) expensesList.innerHTML = '';
+                        if (categoriesListDisplay) renderCategories(); 
+                        if (creditCardsListContainer) renderCreditCards(); 
+                        if(totalGeneralExpensesDisplay) totalGeneralExpensesDisplay.textContent = formatCurrencyCLP(0);
+                        if(balanceDisplay) balanceDisplay.textContent = formatCurrencyCLP(0);
+                        renderCreditCardPaymentVisuals();
+                        renderIncomeSummary();
+                    }
                 }
+                showAuthUI(); 
             }
+            authStateKnown = true; 
         });
 
-        // --- Utility, App Logic (el resto de las funciones permanecen igual) ---
+        // --- Utility, App Logic ---
         function formatCurrencyCLP(value, includeSymbol = true) { const num = Math.round(parseFloat(value)); if (isNaN(num)) return includeSymbol ? "$0" : "0"; const formattedNum = num.toLocaleString('es-CL'); return includeSymbol ? `$${formattedNum}` : formattedNum;}
         function parseCurrencyCLP(value) { if (typeof value !== 'string') return parseFloat(value) || 0; return parseFloat(value.replace(/\$/g, '').replace(/\./g, '').replace(/,/g, '.')) || 0;}
         function applyAmountFormattingListeners(inputElement) { if (!inputElement) return; inputElement.addEventListener('input', function(e) { let value = e.target.value; let rawValue = value.replace(/[^\d]/g, ''); if (rawValue) { const num = parseInt(rawValue, 10); e.target.value = num.toLocaleString('es-CL'); } else { e.target.value = ''; } }); inputElement.addEventListener('blur', function(e) { let rawValue = e.target.value.replace(/[^\d]/g, ''); if (rawValue) { e.target.value = formatCurrencyCLP(parseInt(rawValue, 10)); } else { e.target.value = ''; } const changeEvent = new Event('change', { bubbles: true, cancelable: true }); e.target.dispatchEvent(changeEvent); }); inputElement.addEventListener('focus', function(e) { let rawValue = e.target.value.replace(/[^\d]/g, ''); if (rawValue) { e.target.value = parseInt(rawValue, 10); } else { e.target.value = ''; } });}
@@ -644,7 +650,7 @@
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         .container { max-width: 1100px; } 
         .auth-form { max-width: 400px; }
-        .scrollable-list { max-height: 350px; overflow-y: auto; } /* Aumentado de 250px a 350px */
+        .scrollable-list { max-height: 350px; overflow-y: auto; } 
         #creditCardPaymentsChartContainer { position: relative; height:300px; width:100%;}
         .modal { background-color: rgba(0,0,0,0.5); }
         .modal-content { max-height: 90vh; overflow-y: auto; }
