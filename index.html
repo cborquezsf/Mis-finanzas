@@ -29,9 +29,6 @@
             setLogLevel 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // MODO DE PRUEBA: Cambia a 'true' para saltar la autenticación durante las pruebas.
-        const TESTING_MODE = false; 
-
         // Your web app's Firebase configuration
         const firebaseConfig = {
           apiKey: "AIzaSyB0uI9mJ6TnY8JaSiO_B0YHS4-MxTdZ8_A", // USA TUS VALORES REALES AQUÍ
@@ -89,40 +86,32 @@
         function mapAuthError(errorCode) { switch (errorCode) { case 'auth/email-already-in-use': return 'El correo electrónico ya está en uso.'; case 'auth/invalid-email': return 'El formato del correo electrónico no es válido.'; case 'auth/operation-not-allowed': return 'El inicio de sesión con correo y contraseña no está habilitado.'; case 'auth/weak-password': return 'La contraseña es demasiado débil.'; case 'auth/user-disabled': return 'Este usuario ha sido deshabilitado.'; case 'auth/user-not-found': return 'No se encontró un usuario con este correo.'; case 'auth/wrong-password': return 'Contraseña incorrecta.'; case 'auth/invalid-credential': return 'Credenciales inválidas.'; default: return errorCode; }}
 
         onAuthStateChanged(auth, (user) => {
-            if (TESTING_MODE) {
-                userId = "test-user-id"; 
-                userEmail = "test@example.com"; 
-                console.log("MODO DE PRUEBA ACTIVADO. Usuario de prueba:", userId, userEmail);
-                
-                if (messageArea) messageArea.textContent = ''; 
-                if (messageAreaApp) messageAreaApp.textContent = ''; 
-                
-                showAppUI(); 
-                loadFinancialData(); 
-                
-                if (logoutButton && userDisplayArea) { 
-                    userDisplayArea.classList.remove('hidden');
-                    if(userIdDisplay) userIdDisplay.textContent = `MODO PRUEBA (${userEmail})`;
-                }
-
-            } else if (user) { 
+            if (user) { // Usuario está autenticado
                 userId = user.uid;
                 userEmail = user.email;
                 console.log("Usuario autenticado:", userId, userEmail);
+                
                 if (messageArea) messageArea.textContent = ''; 
                 if (messageAreaApp) messageAreaApp.textContent = ''; 
+                
                 showAppUI();
                 loadFinancialData();
-            } else { 
+            } else { // No hay usuario autenticado o cerró sesión
                 userId = null;
                 userEmail = null;
                 console.log("No hay usuario autenticado.");
+                
                 if (financialDataUnsubscribe) financialDataUnsubscribe(); 
+                
+                // Resetear estado de la aplicación
                 generalExpenses = []; 
                 creditCards = [];
                 categories = [{ id: crypto.randomUUID(), name: "General" }];
                 mainIncome = { amount: 0, date: new Date().toISOString().split('T')[0] };
-                showAuthUI(); 
+                
+                showAuthUI(); // Mostrar UI de autenticación
+                
+                // Limpiar campos de la UI de la aplicación si estaba visible
                 if (appContainer && document.readyState === "complete") { 
                     if (mainIncomeInput) mainIncomeInput.value = '';
                     if (mainIncomeDateInput) mainIncomeDateInput.value = new Date().toISOString().split('T')[0];
@@ -137,7 +126,7 @@
             }
         });
 
-        // --- Utility, App Logic ---
+        // --- Utility, App Logic (el resto de las funciones permanecen igual) ---
         function formatCurrencyCLP(value, includeSymbol = true) { const num = Math.round(parseFloat(value)); if (isNaN(num)) return includeSymbol ? "$0" : "0"; const formattedNum = num.toLocaleString('es-CL'); return includeSymbol ? `$${formattedNum}` : formattedNum;}
         function parseCurrencyCLP(value) { if (typeof value !== 'string') return parseFloat(value) || 0; return parseFloat(value.replace(/\$/g, '').replace(/\./g, '').replace(/,/g, '.')) || 0;}
         function applyAmountFormattingListeners(inputElement) { if (!inputElement) return; inputElement.addEventListener('input', function(e) { let value = e.target.value; let rawValue = value.replace(/[^\d]/g, ''); if (rawValue) { const num = parseInt(rawValue, 10); e.target.value = num.toLocaleString('es-CL'); } else { e.target.value = ''; } }); inputElement.addEventListener('blur', function(e) { let rawValue = e.target.value.replace(/[^\d]/g, ''); if (rawValue) { e.target.value = formatCurrencyCLP(parseInt(rawValue, 10)); } else { e.target.value = ''; } const changeEvent = new Event('change', { bubbles: true, cancelable: true }); e.target.dispatchEvent(changeEvent); }); inputElement.addEventListener('focus', function(e) { let rawValue = e.target.value.replace(/[^\d]/g, ''); if (rawValue) { e.target.value = parseInt(rawValue, 10); } else { e.target.value = ''; } });}
@@ -154,14 +143,14 @@
 
             listItem.innerHTML = `
                 <div class="flex-grow sm:w-2/5 relative">
-                    <input type="text" placeholder="Nombre del Gasto" value="${name}" class="expense-name w-full p-2 border rounded-md pr-10" data-field="name">
+                    <input type="text" placeholder="Nombre del Gasto" value="${name}" class="expense-name w-full p-3 border rounded-md pr-10" data-field="name">
                     <button type="button" title="Sugerir Categoría con IA" class="suggest-category-btn absolute right-1 top-1/2 -translate-y-1/2 p-1 text-blue-500 hover:text-blue-700">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3L12 21M12 3L15.35 6.35M12 3L8.65 6.35M12 21L15.35 17.65M12 21L8.65 17.65M3 12L21 12M3 12L6.35 15.35M3 12L6.35 8.65M21 12L17.65 15.35M21 12L17.65 8.65M12 5.5C12.8284 5.5 13.5 4.82843 13.5 4C13.5 3.17157 12.8284 2.5 12 2.5C11.1716 2.5 10.5 3.17157 10.5 4C10.5 4.82843 11.1716 5.5 12 5.5ZM12 12.5C12.8284 12.5 13.5 11.8284 13.5 11C13.5 10.1716 12.8284 9.5 12 9.5C11.1716 9.5 10.5 10.1716 10.5 11C10.5 11.8284 11.1716 12.5 12 12.5ZM12 19.5C12.8284 19.5 13.5 18.8284 13.5 18C13.5 17.1716 12.8284 16.5 12 16.5C11.1716 16.5 10.5 17.1716 10.5 18C10.5 18.8284 11.1716 19.5 12 19.5Z"></path></svg>
                     </button>
                 </div>
-                <select class="expense-category-select sm:w-1/4 p-2 border rounded-md" data-field="category" data-selected-category="${categoryName}"></select>
-                <input type="text" inputmode="text" placeholder="Monto (Ej: 10000)" value="${amount ? formatCurrencyCLP(amount, false) : ''}" class="expense-amount sm:w-1/4 p-2 border rounded-md" data-field="amount">
-                <button type="button" class="remove-expense text-red-500 hover:text-red-700 p-2 bg-red-100 rounded-md sm:w-auto w-full">&times; Eliminar</button>
+                <select class="expense-category-select sm:w-1/4 p-3 border rounded-md" data-field="category" data-selected-category="${categoryName}"></select>
+                <input type="text" inputmode="text" placeholder="Monto (Ej: 10000)" value="${amount ? formatCurrencyCLP(amount, false) : ''}" class="expense-amount sm:w-1/4 p-3 border rounded-md" data-field="amount">
+                <button type="button" class="remove-expense text-red-500 hover:text-red-700 p-3 bg-red-100 rounded-md sm:w-auto w-full">&times; Eliminar</button>
             `;
             expensesList.appendChild(listItem);
             applyAmountFormattingListeners(listItem.querySelector('.expense-amount'));
@@ -175,9 +164,9 @@
                     showMessage("Por favor, ingresa un nombre para el gasto primero.", "warn", messageAreaApp);
                     return;
                 }
-                const button = e.currentTarget; // Use currentTarget to ensure it's the button
+                const button = e.currentTarget; 
                 button.disabled = true;
-                button.innerHTML = `<svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`; // Loading spinner
+                button.innerHTML = `<svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`; 
 
                 try {
                     const suggestedCategory = await suggestCategoryWithGemini(expenseName, categories.map(c => c.name));
@@ -655,7 +644,7 @@
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         .container { max-width: 1100px; } 
         .auth-form { max-width: 400px; }
-        .scrollable-list { max-height: 250px; overflow-y: auto; }
+        .scrollable-list { max-height: 350px; overflow-y: auto; } /* Aumentado de 250px a 350px */
         #creditCardPaymentsChartContainer { position: relative; height:300px; width:100%;}
         .modal { background-color: rgba(0,0,0,0.5); }
         .modal-content { max-height: 90vh; overflow-y: auto; }
@@ -697,7 +686,7 @@
 
         <div id="messageAreaApp" class="p-3 rounded-md text-sm mb-4" role="alert"></div> 
         
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12"> 
             <div class="lg:col-span-1 space-y-6">
                 <section class="p-4 bg-green-50 rounded-lg shadow">
                     <h2 class="text-xl font-semibold text-green-600 mb-3">Ingreso/Aporte Principal</h2>
@@ -844,8 +833,8 @@
         </div>
         
         <footer class="mt-12 text-center text-xs text-gray-500">
-            <p>Control de Gastos Pro v1.4.1</p> </footer>
+            <p>Control de Gastos Pro v1.4.2</p> 
+        </footer>
     </div>
 </body>
 </html>
-
